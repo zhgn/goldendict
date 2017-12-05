@@ -33,18 +33,19 @@ RCC_DIR = build
 LIBS += \
         -lz \
 
-win32 { 
+win32 {
+    LIBS += -L$$PWD/winlibs/lib
     LIBS += -liconv \
         -lwsock32 \
         -lwinmm \
         -lpsapi
-    LIBS += -lvorbisfile \
-        -lvorbis \
-        -logg \
-        -lhunspell-1.2
+    LIBS += -llibvorbisfile \
+        -llibvorbis \
+        -llibogg \
+        -lhunspell \
+        -lShell32 -lUser32
     RC_FILE = goldendict.rc
     INCLUDEPATH += winlibs/include
-    LIBS += -Lwinlibs/lib
 }
 unix {
 
@@ -54,9 +55,9 @@ unix {
 
     CONFIG += link_pkgconfig
     PKGCONFIG += vorbisfile \
-    	vorbis \
-	ogg \
-	hunspell
+        vorbis \
+    ogg \
+    hunspell
     LIBS += -lX11 \
         -lXtst
     PREFIX = $$(PREFIX)
@@ -151,7 +152,7 @@ HEADERS += folding.hh \
     articlewebview.hh \
     zipfile.hh \
     indexedzip.hh \
-    termination.hh \
+#    termination.hh \
     greektranslit.hh \
     webmultimediadownload.hh \
     forvo.hh \
@@ -233,13 +234,13 @@ SOURCES += folding.cc \
     articlewebview.cc \
     zipfile.cc \
     indexedzip.cc \
-    termination.cc \
+#    termination.cc \
     greektranslit.cc \
     webmultimediadownload.cc \
     forvo.cc \
     country.cc \
     about.cc
-win32 { 
+win32 {
     SOURCES += mouseover_win32/ThTypes.c
     HEADERS += mouseover_win32/ThTypes.h
 }
@@ -267,19 +268,21 @@ TRANSLATIONS += locale/ru_RU.ts \
 }
 
 # This makes qmake generate translations
-win32:# Windows doesn't seem to have *-qt4 symlinks
-isEmpty(QMAKE_LRELEASE):QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
-isEmpty(QMAKE_LRELEASE):QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease-qt4
-updateqm.input = TRANSLATIONS
-updateqm.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
-updateqm.commands = $$QMAKE_LRELEASE \
-    ${QMAKE_FILE_IN} \
-    -qm \
-    ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
-updateqm.CONFIG += no_link
-QMAKE_EXTRA_COMPILERS += updateqm
-TS_OUT = $$TRANSLATIONS
-TS_OUT ~= s/.ts/.qm/g
-PRE_TARGETDEPS += $$TS_OUT
+#win32:# Windows doesn't seem to have *-qt4 symlinks
+#isEmpty(QMAKE_LRELEASE):QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
+#isEmpty(QMAKE_LRELEASE):QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease-qt4
+#updateqm.input = TRANSLATIONS
+#updateqm.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+#updateqm.commands = $$QMAKE_LRELEASE \
+#    ${QMAKE_FILE_IN} \
+#    -qm \
+#    ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}.qm
+#updateqm.CONFIG += no_link
+#QMAKE_EXTRA_COMPILERS += updateqm
+#TS_OUT = $$TRANSLATIONS
+#TS_OUT ~= s/.ts/.qm/g
+#PRE_TARGETDEPS += $$TS_OUT
 
 include( qtsingleapplication/src/qtsingleapplication.pri )
+
+message($$LIBS)

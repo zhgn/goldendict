@@ -1,4 +1,4 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "file.hh"
@@ -8,7 +8,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
+//#include <unistd.h>
 
 namespace File {
 
@@ -138,7 +138,7 @@ char * Class::gets( char * s, int size, bool stripNl )
   if ( result && stripNl )
   {
     size_t len = strlen( result );
-    
+
     char * last = result + len;
 
     while( len-- )

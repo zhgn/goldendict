@@ -1,4 +1,4 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "zipfile.hh"
@@ -14,7 +14,7 @@ struct EndOfCdirRecord
   quint16 numDisk, numDiskCd, totalEntriesDisk, totalEntries;
   quint32 size, offset;
   quint16 commentLength;
-} __attribute__((packed));
+} ;
 
 struct CentralFileHeaderRecord
 {
@@ -24,7 +24,7 @@ struct CentralFileHeaderRecord
   quint16 fileNameLength, extraFieldLength, fileCommentLength, diskNumberStart,
           intFileAttrs;
   quint32 externalFileAttrs, offsetOfLocalHeader;
-} __attribute__((packed));
+} ;
 
 struct LocalFileHeaderRecord
 {
@@ -32,7 +32,7 @@ struct LocalFileHeaderRecord
   quint16 verNeeded, gpBits, compressionMethod, fileTime, fileDate;
   quint32 crc32, compressedSize, uncompressedSize;
   quint16 fileNameLength, extraFieldLength;
-} __attribute__((packed));
+} ;
 
 static quint32 const endOfCdirRecordSignatureValue = qToLittleEndian( 0x06054b50 );
 static quint32 const centralFileHeaderSignature = qToLittleEndian( 0x02014b50 );

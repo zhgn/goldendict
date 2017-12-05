@@ -97,7 +97,7 @@ struct IdxHeader
   uint32_t zipIndexRootOffset;
 }
 #ifndef _MSC_VER
-__attribute__((packed))
+
 #endif
 ;
 

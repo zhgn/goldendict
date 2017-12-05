@@ -74,7 +74,7 @@ namespace
     uint32_t iconSize; // Size of the icon in the chunks' storage, 0 = no icon
   }
   #ifndef _MSC_VER
-  __attribute__((packed))
+  
   #endif
   ;
 

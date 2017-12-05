@@ -55,7 +55,7 @@ struct IdxHeader
   uint32_t indexRootOffset;
 } 
 #ifndef _MSC_VER
-__attribute__((packed))
+
 #endif
 ;
 
@@ -375,7 +375,7 @@ struct WavHeader
   uint32_t dataLength;
 } 
 #ifndef _MSC_VER
-__attribute__((packed))
+
 #endif
 ;
 

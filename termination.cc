@@ -1,14 +1,14 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "termination.hh"
 #include <exception>
 #include <typeinfo>
-#include <cxxabi.h>
+//#include <cxxabi.h>
 #include <string>
 
 #ifndef __WIN32
-#include <execinfo.h>
+//#include <execinfo.h>
 #endif
 
 #include <stdio.h>
@@ -53,9 +53,9 @@ static void termHandler()
     catch( std::exception & e )
     {
       message += "Message: ";
-      
+
       message += e.what();
-      
+
       message += '\n';
     }
     catch( ... )

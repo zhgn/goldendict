@@ -1,4 +1,4 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "config.hh"
@@ -7,48 +7,47 @@
 #include <QtXml>
 
 #ifdef _MSC_VER
-#include <stdint_msvc.h>
+    #include <stdint_msvc.h>
 #else
-#include <stdint.h>
+    #include <stdint.h>
 #endif
 
 #ifdef Q_OS_WIN32
-#include "shlobj.h"
+    #include "shlobj.h"
 #endif
 
 #include "atomic_rename.hh"
 
-namespace Config {
+namespace Config
+{
 
 namespace
 {
-  QDir getHomeDir()
-  {
+QDir getHomeDir()
+{
     if ( isPortableVersion() )
-      return QDir( QCoreApplication::applicationDirPath() + "/portable" );
+        return QDir( QCoreApplication::applicationDirPath() + "/portable" );
 
     QDir result = QDir::home();
-
-    char const * pathInHome =
-      #ifdef Q_OS_WIN32
-      "Application Data/GoldenDict"
-      #else
-      ".goldendict"
-      #endif
-      ;
-
+    char const *pathInHome =
+#ifdef Q_OS_WIN32
+        "Application Data/GoldenDict"
+#else
+        ".goldendict"
+#endif
+        ;
     result.mkpath( pathInHome );
 
     if ( !result.cd( pathInHome ) )
-      throw exCantUseHomeDir();
+        throw exCantUseHomeDir();
 
     return result;
-  }
+}
 
-  QString getConfigFileName()
-  {
+QString getConfigFileName()
+{
     return getHomeDir().absoluteFilePath( "config" );
-  }
+}
 }
 
 ProxyServer::ProxyServer(): enabled( false ), type( Socks5 ), port( 3128 )
@@ -64,1139 +63,988 @@ HotKey::HotKey(): modifiers( 0 ), key1( 0 ), key2( 0 )
 
 uint32_t const keyMask = 0x01FFFFFF;
 
-HotKey::HotKey( QKeySequence const & seq ):
-  modifiers( seq[ 0 ] & ~keyMask ),
-  key1( seq[ 0 ] & keyMask ),
-  key2( seq[ 1 ] & keyMask )
+HotKey::HotKey( QKeySequence const &seq ):
+    modifiers( seq[ 0 ] & ~keyMask ),
+    key1( seq[ 0 ] & keyMask ),
+    key2( seq[ 1 ] & keyMask )
 {
 }
 
 QKeySequence HotKey::toKeySequence() const
 {
-  int v2 = key2 ? ( key2 | modifiers ): 0;
-
-  return QKeySequence( key1 | modifiers, v2 );
+    int v2 = key2 ? ( key2 | modifiers ) : 0;
+    return QKeySequence( key1 | modifiers, v2 );
 }
 
 Preferences::Preferences():
-  newTabsOpenAfterCurrentOne( false ),
-  newTabsOpenInBackground( true ),
-  enableTrayIcon( true ),
-  startToTray( false ),
-  closeToTray( true ),
-  autoStart( false ),
-  doubleClickTranslates( true ),
+    newTabsOpenAfterCurrentOne( false ),
+    newTabsOpenInBackground( true ),
+    enableTrayIcon( true ),
+    startToTray( false ),
+    closeToTray( true ),
+    autoStart( false ),
+    doubleClickTranslates( true ),
 
-  enableMainWindowHotkey( true ),
-  mainWindowHotkey( QKeySequence( "Ctrl+F11,F11" ) ),
-  enableClipboardHotkey( true ),
-  clipboardHotkey( QKeySequence( "Ctrl+C,C" ) ),
+    enableMainWindowHotkey( true ),
+    mainWindowHotkey( QKeySequence( "Ctrl+F11,F11" ) ),
+    enableClipboardHotkey( true ),
+    clipboardHotkey( QKeySequence( "Ctrl+C,C" ) ),
 
-  enableScanPopup( true ),
-  startWithScanPopupOn( false ),
-  enableScanPopupModifiers( false ),
-  scanPopupModifiers( 0 ),
-  scanPopupAltMode( false ),
-  scanPopupAltModeSecs( 3 ),
-  pronounceOnLoadMain( false ),
-  pronounceOnLoadPopup( false ),
+    enableScanPopup( true ),
+    startWithScanPopupOn( false ),
+    enableScanPopupModifiers( false ),
+    scanPopupModifiers( 0 ),
+    scanPopupAltMode( false ),
+    scanPopupAltModeSecs( 3 ),
+    pronounceOnLoadMain( false ),
+    pronounceOnLoadPopup( false ),
 #ifdef Q_WS_WIN
-  useExternalPlayer( false ),
-  useWindowsPlaySound( true ),
+    useExternalPlayer( false ),
+    useWindowsPlaySound( true ),
 #else
-  useExternalPlayer( true ), // Phonon on Linux still feels quite buggy
-  useWindowsPlaySound( false ),
+    useExternalPlayer( true ), // Phonon on Linux still feels quite buggy
+    useWindowsPlaySound( false ),
 #endif
-  checkForNewReleases( true ),
-  disallowContentFromOtherSites( false ),
-  zoomFactor( 1 ),
-  wordsZoomLevel( 0 )
+    checkForNewReleases( true ),
+    disallowContentFromOtherSites( false ),
+    zoomFactor( 1 ),
+    wordsZoomLevel( 0 )
 {
 }
 
 Romaji::Romaji():
-  enable( false ),
-  enableHepburn( true ),
-  enableNihonShiki( false ),
-  enableKunreiShiki( false ),
-  enableHiragana( true ),
-  enableKatakana( true )
+    enable( false ),
+    enableHepburn( true ),
+    enableNihonShiki( false ),
+    enableKunreiShiki( false ),
+    enableHiragana( true ),
+    enableKatakana( true )
 {
 }
 
 void Events::signalMutedDictionariesChanged()
 {
-  emit mutedDictionariesChanged();
+    emit mutedDictionariesChanged();
 }
 
-namespace {
+namespace
+{
 
 MediaWikis makeDefaultMediaWikis( bool enable )
 {
-  MediaWikis mw;
-
-  mw.push_back( MediaWiki( "ae6f89aac7151829681b85f035d54e48", "English Wikipedia", "http://en.wikipedia.org/w", enable ) );
-  mw.push_back( MediaWiki( "affcf9678e7bfe701c9b071f97eccba3", "English Wiktionary", "http://en.wiktionary.org/w", false ) );
-  mw.push_back( MediaWiki( "8e0c1c2b6821dab8bdba8eb869ca7176", "Russian Wikipedia", "http://ru.wikipedia.org/w", false ) );
-  mw.push_back( MediaWiki( "b09947600ae3902654f8ad4567ae8567", "Russian Wiktionary", "http://ru.wiktionary.org/w", false ) );
-  mw.push_back( MediaWiki( "a8a66331a1242ca2aeb0b4aed361c41d", "German Wikipedia", "http://de.wikipedia.org/w", false ) );
-  mw.push_back( MediaWiki( "21c64bca5ec10ba17ff19f3066bc962a", "German Wiktionary", "http://de.wiktionary.org/w", false ) );
-  mw.push_back( MediaWiki( "96957cb2ad73a20c7a1d561fc83c253a", "Portuguese Wikipedia", "http://pt.wikipedia.org/w", false ) );
-  mw.push_back( MediaWiki( "ed4c3929196afdd93cc08b9a903aad6a", "Portuguese Wiktionary", "http://pt.wiktionary.org/w", false ) );
-
-  return mw;
+    MediaWikis mw;
+    mw.push_back( MediaWiki( "ae6f89aac7151829681b85f035d54e48", "English Wikipedia", "http://en.wikipedia.org/w", enable ) );
+    mw.push_back( MediaWiki( "affcf9678e7bfe701c9b071f97eccba3", "English Wiktionary", "http://en.wiktionary.org/w", false ) );
+    mw.push_back( MediaWiki( "8e0c1c2b6821dab8bdba8eb869ca7176", "Russian Wikipedia", "http://ru.wikipedia.org/w", false ) );
+    mw.push_back( MediaWiki( "b09947600ae3902654f8ad4567ae8567", "Russian Wiktionary", "http://ru.wiktionary.org/w", false ) );
+    mw.push_back( MediaWiki( "a8a66331a1242ca2aeb0b4aed361c41d", "German Wikipedia", "http://de.wikipedia.org/w", false ) );
+    mw.push_back( MediaWiki( "21c64bca5ec10ba17ff19f3066bc962a", "German Wiktionary", "http://de.wiktionary.org/w", false ) );
+    mw.push_back( MediaWiki( "96957cb2ad73a20c7a1d561fc83c253a", "Portuguese Wikipedia", "http://pt.wikipedia.org/w", false ) );
+    mw.push_back( MediaWiki( "ed4c3929196afdd93cc08b9a903aad6a", "Portuguese Wiktionary", "http://pt.wiktionary.org/w", false ) );
+    return mw;
 }
 
 WebSites makeDefaultWebSites()
 {
-  WebSites ws;
-
-  ws.push_back( WebSite( "b88cb2898e634c6638df618528284c2d", "Google En-En (Collins)", "http://www.google.com/dictionary?aq=f&langpair=en|en&q=%GDWORD%&hl=en", false ) );
-  ws.push_back( WebSite( "f376365a0de651fd7505e7e5e683aa45", "Urban Dictionary", "http://www.urbandictionary.com/define.php?term=%GDWORD%", false ) );
-  ws.push_back( WebSite( "324ca0306187df7511b26d3847f4b07c", "Multitran (En)", "http://multitran.ru/c/m.exe?CL=1&l1=1&s=%GD1251%", false ) );
-  ws.push_back( WebSite( "924db471b105299c82892067c0f10787", "Lingvo (En-Ru)", "http://www.abbyyonline.ru/translate.aspx?LingvoAction=translate&Ln=1&words=%GDWORD%", false ) );
-  ws.push_back( WebSite( "087a6d65615fb047f4c80eef0a9465db", "Michaelis (Pt-En)", "http://michaelis.uol.com.br/moderno/ingles/index.php?lingua=portugues-ingles&palavra=%GDISO1%", false ) );
-
-  return ws;
+    WebSites ws;
+    ws.push_back( WebSite( "b88cb2898e634c6638df618528284c2d", "Google En-En (Collins)", "http://www.google.com/dictionary?aq=f&langpair=en|en&q=%GDWORD%&hl=en", false ) );
+    ws.push_back( WebSite( "f376365a0de651fd7505e7e5e683aa45", "Urban Dictionary", "http://www.urbandictionary.com/define.php?term=%GDWORD%", false ) );
+    ws.push_back( WebSite( "324ca0306187df7511b26d3847f4b07c", "Multitran (En)", "http://multitran.ru/c/m.exe?CL=1&l1=1&s=%GD1251%", false ) );
+    ws.push_back( WebSite( "924db471b105299c82892067c0f10787", "Lingvo (En-Ru)", "http://www.abbyyonline.ru/translate.aspx?LingvoAction=translate&Ln=1&words=%GDWORD%", false ) );
+    ws.push_back( WebSite( "087a6d65615fb047f4c80eef0a9465db", "Michaelis (Pt-En)", "http://michaelis.uol.com.br/moderno/ingles/index.php?lingua=portugues-ingles&palavra=%GDISO1%", false ) );
+    return ws;
 }
 
 /// Sets option to true of false if node is "1" or "0" respectively, or leaves
 /// it intact if it's neither "1" nor "0".
-void applyBoolOption( bool & option, QDomNode const & node )
+void applyBoolOption( bool &option, QDomNode const &node )
 {
-  QString value = node.toElement().text();
+    QString value = node.toElement().text();
 
-  if ( value == "1" )
-    option = true;
-  else
-  if ( value == "0" )
-    option = false;
+    if ( value == "1" )
+        option = true;
+    else if ( value == "0" )
+        option = false;
 }
 
-Group loadGroup( QDomElement grp, unsigned * nextId = 0 )
+Group loadGroup( QDomElement grp, unsigned *nextId = 0 )
 {
-  Group g;
+    Group g;
 
-  if ( grp.hasAttribute( "id" ) )
-    g.id = grp.attribute( "id" ).toUInt();
-  else
-    g.id = nextId ? (*nextId)++ : 0;
+    if ( grp.hasAttribute( "id" ) )
+        g.id = grp.attribute( "id" ).toUInt();
+    else
+        g.id = nextId ? ( *nextId )++ : 0;
 
-  g.name = grp.attribute( "name" );
-  g.icon = grp.attribute( "icon" );
+    g.name = grp.attribute( "name" );
+    g.icon = grp.attribute( "icon" );
 
-  if ( !grp.attribute( "iconData" ).isEmpty() )
-    g.iconData = QByteArray::fromBase64( grp.attribute( "iconData" ).toAscii() );
+    if ( !grp.attribute( "iconData" ).isEmpty() )
+        g.iconData = QByteArray::fromBase64( grp.attribute( "iconData" ).toAscii() );
 
-  if ( !grp.attribute( "shortcut" ).isEmpty() )
-    g.shortcut = QKeySequence::fromString( grp.attribute( "shortcut" ) );
+    if ( !grp.attribute( "shortcut" ).isEmpty() )
+        g.shortcut = QKeySequence::fromString( grp.attribute( "shortcut" ) );
 
-  QDomNodeList dicts = grp.elementsByTagName( "dictionary" );
+    QDomNodeList dicts = grp.elementsByTagName( "dictionary" );
 
-  for( unsigned y = 0; y < dicts.length(); ++y )
-    g.dictionaries.push_back( DictionaryRef( dicts.item( y ).toElement().text(),
-                                             dicts.item( y ).toElement().attribute( "name" ) ) );
+    for ( unsigned y = 0; y < dicts.length(); ++y )
+        g.dictionaries.push_back( DictionaryRef( dicts.item( y ).toElement().text(),
+                                  dicts.item( y ).toElement().attribute( "name" ) ) );
 
-  return g;
+    return g;
 }
 
 MutedDictionaries loadMutedDictionaries( QDomNode mutedDictionaries )
 {
-  MutedDictionaries result;
+    MutedDictionaries result;
 
-  if ( !mutedDictionaries.isNull() )
-  {
-    QDomNodeList nl = mutedDictionaries.toElement().
-                        elementsByTagName( "mutedDictionary" );
+    if ( !mutedDictionaries.isNull() )
+    {
+        QDomNodeList nl = mutedDictionaries.toElement().
+                          elementsByTagName( "mutedDictionary" );
 
-    for( unsigned x = 0; x < nl.length(); ++x )
-      result.insert( nl.item( x ).toElement().text() );
-  }
+        for ( unsigned x = 0; x < nl.length(); ++x )
+            result.insert( nl.item( x ).toElement().text() );
+    }
 
-  return result;
+    return result;
 }
 
-void saveMutedDictionaries( QDomDocument & dd, QDomElement & muted,
-                            MutedDictionaries const & mutedDictionaries )
+void saveMutedDictionaries( QDomDocument &dd, QDomElement &muted,
+                            MutedDictionaries const &mutedDictionaries )
 {
-  for( MutedDictionaries::const_iterator i = mutedDictionaries.begin();
-       i != mutedDictionaries.end(); ++i )
-  {
-    QDomElement dict = dd.createElement( "mutedDictionary" );
-    muted.appendChild( dict );
-
-    QDomText value = dd.createTextNode( *i );
-    dict.appendChild( value );
-  }
+    for ( MutedDictionaries::const_iterator i = mutedDictionaries.begin();
+          i != mutedDictionaries.end(); ++i )
+    {
+        QDomElement dict = dd.createElement( "mutedDictionary" );
+        muted.appendChild( dict );
+        QDomText value = dd.createTextNode( *i );
+        dict.appendChild( value );
+    }
 }
 
 }
 
 Class load() throw( exError )
 {
-  QString configName  = getConfigFileName();
+    QString configName  = getConfigFileName();
+    bool loadFromTemplate = false;
 
-  bool loadFromTemplate = false;
+    if ( !QFile::exists( configName ) )
+    {
+        // Make the default config, save it and return it
+        Class c;
+#ifdef Q_OS_LINUX
 
-  if ( !QFile::exists( configName ) )
-  {
-    // Make the default config, save it and return it
-    Class c;
+        if ( QDir( "/usr/share/stardict/dic" ).exists() )
+            c.paths.push_back( Path( "/usr/share/stardict/dic", true ) );
 
-    #ifdef Q_OS_LINUX
-    if ( QDir( "/usr/share/stardict/dic" ).exists() )
-      c.paths.push_back( Path( "/usr/share/stardict/dic", true ) );
+        if ( QDir( "/usr/share/dictd" ).exists() )
+            c.paths.push_back( Path( "/usr/share/dictd", true ) );
 
-    if ( QDir( "/usr/share/dictd" ).exists() )
-      c.paths.push_back( Path( "/usr/share/dictd", true ) );
+        if ( QDir( "/usr/share/WyabdcRealPeopleTTS" ).exists() )
+            c.soundDirs.push_back( SoundDir( "/usr/share/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
 
-    if ( QDir( "/usr/share/WyabdcRealPeopleTTS" ).exists() )
-      c.soundDirs.push_back( SoundDir( "/usr/share/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+        if ( QDir( "/usr/share/myspell/dicts" ).exists() )
+            c.hunspell.dictionariesPath = "/usr/share/myspell/dicts";
 
-    if ( QDir( "/usr/share/myspell/dicts" ).exists() )
-      c.hunspell.dictionariesPath = "/usr/share/myspell/dicts";
+#endif
+#ifdef Q_OS_WIN32
+        // get path to Program Files
+        wchar_t buf[ MAX_PATH ];
+        SHGetFolderPathW( NULL, CSIDL_PROGRAM_FILES, NULL, 0, buf );
+        QString pathToProgramFiles = QString::fromWCharArray( buf );
 
-    #endif
+        if ( pathToProgramFiles.isEmpty() )
+            pathToProgramFiles = "C:\\Program Files";
 
-    #ifdef Q_OS_WIN32
+        if ( QDir( pathToProgramFiles + "\\StarDict\\dic" ).exists() )
+            c.paths.push_back( Path( pathToProgramFiles + "\\StarDict\\dic", true ) );
 
-    // get path to Program Files
-    wchar_t buf[ MAX_PATH ];
-    SHGetFolderPathW( NULL, CSIDL_PROGRAM_FILES, NULL, 0, buf );
-    QString pathToProgramFiles = QString::fromWCharArray( buf );
-    if ( pathToProgramFiles.isEmpty() )
-      pathToProgramFiles = "C:\\Program Files";
+        if ( QDir( pathToProgramFiles + "\\StarDict\\WyabdcRealPeopleTTS" ).exists() )
+            c.soundDirs.push_back( SoundDir( pathToProgramFiles + "\\StarDict\\WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+        else if ( QDir( pathToProgramFiles + "\\WyabdcRealPeopleTTS" ).exists() )
+            c.soundDirs.push_back( SoundDir( pathToProgramFiles + "\\WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
 
-    if ( QDir( pathToProgramFiles + "\\StarDict\\dic" ).exists() )
-      c.paths.push_back( Path( pathToProgramFiles + "\\StarDict\\dic", true ) );
+        // #### "C:/Program Files" is bad! will not work for German Windows etc.
+        // #### should be replaced to system path
+        //    if ( QDir( "C:/Program Files/StarDict/dic" ).exists() )
+        //      c.paths.push_back( Path( "C:/Program Files/StarDict/dic", true ) );
+        //
+        //    if ( QDir( "C:/Program Files/StarDict/WyabdcRealPeopleTTS" ).exists() )
+        //      c.soundDirs.push_back( SoundDir( "C:/Program Files/StarDict/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+        //    else
+        //    if ( QDir( "C:/Program Files/WyabdcRealPeopleTTS" ).exists() )
+        //      c.soundDirs.push_back( SoundDir( "C:/Program Files/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+#endif
+#ifndef Q_OS_WIN32
+        c.preferences.audioPlaybackProgram = "mplayer";
+#endif
+        QString possibleMorphologyPath = getProgramDataDir() + "/content/morphology";
 
-    if ( QDir( pathToProgramFiles + "\\StarDict\\WyabdcRealPeopleTTS" ).exists() )
-      c.soundDirs.push_back( SoundDir( pathToProgramFiles + "\\StarDict\\WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
-    else
-    if ( QDir( pathToProgramFiles + "\\WyabdcRealPeopleTTS" ).exists() )
-      c.soundDirs.push_back( SoundDir( pathToProgramFiles + "\\WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+        if ( QDir( possibleMorphologyPath ).exists() )
+            c.hunspell.dictionariesPath = possibleMorphologyPath;
 
-    // #### "C:/Program Files" is bad! will not work for German Windows etc.
-    // #### should be replaced to system path
+        c.mediawikis = makeDefaultMediaWikis( true );
+        c.webSites = makeDefaultWebSites();
+        // Check if we have a template config file. If we do, load it instead
+        configName = getProgramDataDir() + "/content/defconfig";
+        loadFromTemplate = QFile( configName ).exists();
 
-//    if ( QDir( "C:/Program Files/StarDict/dic" ).exists() )
-//      c.paths.push_back( Path( "C:/Program Files/StarDict/dic", true ) );
-//
-//    if ( QDir( "C:/Program Files/StarDict/WyabdcRealPeopleTTS" ).exists() )
-//      c.soundDirs.push_back( SoundDir( "C:/Program Files/StarDict/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
-//    else
-//    if ( QDir( "C:/Program Files/WyabdcRealPeopleTTS" ).exists() )
-//      c.soundDirs.push_back( SoundDir( "C:/Program Files/WyabdcRealPeopleTTS", "WyabdcRealPeopleTTS" ) );
+        if ( !loadFromTemplate )
+        {
+            save( c );
+            return c;
+        }
+    }
 
-    #endif
+    QFile configFile( configName );
 
-    #ifndef Q_OS_WIN32
-    c.preferences.audioPlaybackProgram = "mplayer";
-    #endif
+    if ( !configFile.open( QFile::ReadOnly ) )
+        throw exCantReadConfigFile();
 
-    QString possibleMorphologyPath = getProgramDataDir() + "/content/morphology";
-
-    if ( QDir( possibleMorphologyPath ).exists() )
-      c.hunspell.dictionariesPath = possibleMorphologyPath;
-
-    c.mediawikis = makeDefaultMediaWikis( true );
-    c.webSites = makeDefaultWebSites();
-
-    // Check if we have a template config file. If we do, load it instead
-
-    configName = getProgramDataDir() + "/content/defconfig";
-    loadFromTemplate = QFile( configName ).exists();
+    QDomDocument dd;
+    QString errorStr;
+    int errorLine, errorColumn;
 
     if ( !loadFromTemplate )
     {
-      save( c );
-
-      return c;
+        // Load the config as usual
+        if ( !dd.setContent( &configFile, false, &errorStr, &errorLine, &errorColumn ) )
+        {
+            printf( "Error: %s at %d,%d\n", errorStr.toLocal8Bit().constData(),  errorLine,  errorColumn );
+            throw exMalformedConfigFile();
+        }
     }
-  }
-
-  QFile configFile( configName );
-
-  if ( !configFile.open( QFile::ReadOnly ) )
-    throw exCantReadConfigFile();
-
-  QDomDocument dd;
-
-  QString errorStr;
-  int errorLine, errorColumn;
-
-  if ( !loadFromTemplate )
-  {
-    // Load the config as usual
-    if ( !dd.setContent( &configFile, false, &errorStr, &errorLine, &errorColumn  ) )
-    {
-      printf( "Error: %s at %d,%d\n", errorStr.toLocal8Bit().constData(),  errorLine,  errorColumn );
-        throw exMalformedConfigFile();
-    }
-  }
-  else
-  {
-    // We need to replace all %PROGRAMDIR% with the program data dir
-    QByteArray data = configFile.readAll();
-
-    data.replace( "%PROGRAMDIR%", getProgramDataDir().toUtf8() );
-
-    QBuffer bufferedData( &data );
-
-    if ( !dd.setContent( &bufferedData, false, &errorStr, &errorLine, &errorColumn  ) )
-    {
-      printf( "Error: %s at %d,%d\n", errorStr.toLocal8Bit().constData(),  errorLine,  errorColumn );
-        throw exMalformedConfigFile();
-    }
-  }
-
-  configFile.close();
-
-  QDomNode root = dd.namedItem( "config" );
-
-  Class c;
-
-  QDomNode paths = root.namedItem( "paths" );
-
-  if ( !paths.isNull() )
-  {
-    QDomNodeList nl = paths.toElement().elementsByTagName( "path" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-      c.paths.push_back(
-        Path( nl.item( x ).toElement().text(),
-              nl.item( x ).toElement().attribute( "recursive" ) == "1" ) );
-  }
-
-  QDomNode soundDirs = root.namedItem( "sounddirs" );
-
-  if ( !soundDirs.isNull() )
-  {
-    QDomNodeList nl = soundDirs.toElement().elementsByTagName( "sounddir" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-      c.soundDirs.push_back(
-        SoundDir( nl.item( x ).toElement().text(),
-                  nl.item( x ).toElement().attribute( "name" ) ) );
-  }
-
-  QDomNode dictionaryOrder = root.namedItem( "dictionaryOrder" );
-
-  if ( !dictionaryOrder.isNull() )
-    c.dictionaryOrder = loadGroup( dictionaryOrder.toElement() );
-
-  QDomNode inactiveDictionaries = root.namedItem( "inactiveDictionaries" );
-
-  if ( !inactiveDictionaries.isNull() )
-    c.inactiveDictionaries = loadGroup( inactiveDictionaries.toElement() );
-
-  QDomNode groups = root.namedItem( "groups" );
-
-  if ( !groups.isNull() )
-  {
-    c.groups.nextId = groups.toElement().attribute( "nextId", "1" ).toUInt();
-
-    QDomNodeList nl = groups.toElement().elementsByTagName( "group" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-    {
-      QDomElement grp = nl.item( x ).toElement();
-
-      c.groups.push_back( loadGroup( grp, &c.groups.nextId ) );
-    }
-  }
-
-  QDomNode hunspell = root.namedItem( "hunspell" );
-
-  if ( !hunspell.isNull() )
-  {
-    c.hunspell.dictionariesPath = hunspell.toElement().attribute( "dictionariesPath" );
-
-    QDomNodeList nl = hunspell.toElement().elementsByTagName( "enabled" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-      c.hunspell.enabledDictionaries.push_back( nl.item( x ).toElement().text() );
-  }
-
-  QDomNode transliteration = root.namedItem( "transliteration" );
-
-  if ( !transliteration.isNull() )
-  {
-    applyBoolOption( c.transliteration.enableRussianTransliteration,
-                     transliteration.namedItem( "enableRussianTransliteration" ) );
-
-    applyBoolOption( c.transliteration.enableGermanTransliteration,
-                     transliteration.namedItem( "enableGermanTransliteration" ) );
-
-    applyBoolOption( c.transliteration.enableGreekTransliteration,
-                     transliteration.namedItem( "enableGreekTransliteration" ) );
-
-    QDomNode romaji = transliteration.namedItem( "romaji" );
-
-    if ( !romaji.isNull() )
-    {
-      applyBoolOption( c.transliteration.romaji.enable, romaji.namedItem( "enable" ) );
-      applyBoolOption( c.transliteration.romaji.enableHepburn, romaji.namedItem( "enableHepburn" ) );
-      applyBoolOption( c.transliteration.romaji.enableNihonShiki, romaji.namedItem( "enableNihonShiki" ) );
-      applyBoolOption( c.transliteration.romaji.enableKunreiShiki, romaji.namedItem( "enableKunreiShiki" ) );
-      applyBoolOption( c.transliteration.romaji.enableHiragana, romaji.namedItem( "enableHiragana" ) );
-      applyBoolOption( c.transliteration.romaji.enableKatakana, romaji.namedItem( "enableKatakana" ) );
-    }
-  }
-
-  QDomNode forvo = root.namedItem( "forvo" );
-
-  if ( !forvo.isNull() )
-  {
-    applyBoolOption( c.forvo.enable,
-                     forvo.namedItem( "enable" ) );
-
-    c.forvo.apiKey = forvo.namedItem( "apiKey" ).toElement().text();
-    c.forvo.languageCodes = forvo.namedItem( "languageCodes" ).toElement().text();
-  }
-  else
-    c.forvo.languageCodes = "en, ru"; // Default demo values
-
-  QDomNode mws = root.namedItem( "mediawikis" );
-
-  if ( !mws.isNull() )
-  {
-    QDomNodeList nl = mws.toElement().elementsByTagName( "mediawiki" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-    {
-      QDomElement mw = nl.item( x ).toElement();
-
-      MediaWiki w;
-
-      w.id = mw.attribute( "id" );
-      w.name = mw.attribute( "name" );
-      w.url = mw.attribute( "url" );
-      w.enabled = ( mw.attribute( "enabled" ) == "1" );
-
-      c.mediawikis.push_back( w );
-    }
-  }
-  else
-  {
-    // When upgrading, populate the list with some choices, but don't enable
-    // anything.
-    c.mediawikis = makeDefaultMediaWikis( false );
-  }
-
-  QDomNode wss = root.namedItem( "websites" );
-
-  if ( !wss.isNull() )
-  {
-    QDomNodeList nl = wss.toElement().elementsByTagName( "website" );
-
-    for( unsigned x = 0; x < nl.length(); ++x )
-    {
-      QDomElement ws = nl.item( x ).toElement();
-
-      WebSite w;
-
-      w.id = ws.attribute( "id" );
-      w.name = ws.attribute( "name" );
-      w.url = ws.attribute( "url" );
-      w.enabled = ( ws.attribute( "enabled" ) == "1" );
-
-      c.webSites.push_back( w );
-    }
-  }
-  else
-  {
-    // Upgrading
-    c.webSites = makeDefaultWebSites();
-  }
-
-  c.mutedDictionaries = loadMutedDictionaries( root.namedItem( "mutedDictionaries" ) );
-  c.popupMutedDictionaries = loadMutedDictionaries( root.namedItem( "popupMutedDictionaries" ) );
-
-  QDomNode preferences = root.namedItem( "preferences" );
-
-  if ( !preferences.isNull() )
-  {
-    c.preferences.interfaceLanguage = preferences.namedItem( "interfaceLanguage" ).toElement().text();
-    c.preferences.displayStyle = preferences.namedItem( "displayStyle" ).toElement().text();
-    c.preferences.newTabsOpenAfterCurrentOne = ( preferences.namedItem( "newTabsOpenAfterCurrentOne" ).toElement().text() == "1" );
-    c.preferences.newTabsOpenInBackground = ( preferences.namedItem( "newTabsOpenInBackground" ).toElement().text() == "1" );
-    c.preferences.enableTrayIcon = ( preferences.namedItem( "enableTrayIcon" ).toElement().text() == "1" );
-    c.preferences.startToTray = ( preferences.namedItem( "startToTray" ).toElement().text() == "1" );
-    c.preferences.closeToTray = ( preferences.namedItem( "closeToTray" ).toElement().text() == "1" );
-    c.preferences.autoStart = ( preferences.namedItem( "autoStart" ).toElement().text() == "1" );
-
-    if ( !preferences.namedItem( "doubleClickTranslates" ).isNull() )
-      c.preferences.doubleClickTranslates = ( preferences.namedItem( "doubleClickTranslates" ).toElement().text() == "1" );
-
-    if ( !preferences.namedItem( "zoomFactor" ).isNull() )
-      c.preferences.zoomFactor = preferences.namedItem( "zoomFactor" ).toElement().text().toDouble();
-
-    if ( !preferences.namedItem( "wordsZoomLevel" ).isNull() )
-      c.preferences.wordsZoomLevel = preferences.namedItem( "wordsZoomLevel" ).toElement().text().toInt();
-
-    applyBoolOption( c.preferences.enableMainWindowHotkey, preferences.namedItem( "enableMainWindowHotkey" ) );
-    if ( !preferences.namedItem( "mainWindowHotkey" ).isNull() )
-      c.preferences.mainWindowHotkey = QKeySequence::fromString( preferences.namedItem( "mainWindowHotkey" ).toElement().text() );
-    applyBoolOption( c.preferences.enableClipboardHotkey, preferences.namedItem( "enableClipboardHotkey" ) );
-    if ( !preferences.namedItem( "clipboardHotkey" ).isNull() )
-      c.preferences.clipboardHotkey = QKeySequence::fromString( preferences.namedItem( "clipboardHotkey" ).toElement().text() );
-
-    c.preferences.enableScanPopup = ( preferences.namedItem( "enableScanPopup" ).toElement().text() == "1" );
-    c.preferences.startWithScanPopupOn = ( preferences.namedItem( "startWithScanPopupOn" ).toElement().text() == "1" );
-    c.preferences.enableScanPopupModifiers = ( preferences.namedItem( "enableScanPopupModifiers" ).toElement().text() == "1" );
-    c.preferences.scanPopupModifiers = ( preferences.namedItem( "scanPopupModifiers" ).toElement().text().toULong() );
-    c.preferences.scanPopupAltMode = ( preferences.namedItem( "scanPopupAltMode" ).toElement().text() == "1" );
-    if ( !preferences.namedItem( "scanPopupAltModeSecs" ).isNull() )
-      c.preferences.scanPopupAltModeSecs = preferences.namedItem( "scanPopupAltModeSecs" ).toElement().text().toUInt();
-
-    c.preferences.pronounceOnLoadMain = ( preferences.namedItem( "pronounceOnLoadMain" ).toElement().text() == "1" );
-    c.preferences.pronounceOnLoadPopup = ( preferences.namedItem( "pronounceOnLoadPopup" ).toElement().text() == "1" );
-    
-    if ( !preferences.namedItem( "useExternalPlayer" ).isNull() )
-      c.preferences.useExternalPlayer = ( preferences.namedItem( "useExternalPlayer" ).toElement().text() == "1" );
-
-    if ( !preferences.namedItem( "useWindowsPlaySound" ).isNull() )
-      c.preferences.useWindowsPlaySound = ( preferences.namedItem( "useWindowsPlaySound" ).toElement().text() == "1" );
-
-    if ( !preferences.namedItem( "audioPlaybackProgram" ).isNull() )
-      c.preferences.audioPlaybackProgram = preferences.namedItem( "audioPlaybackProgram" ).toElement().text();
     else
-      c.preferences.audioPlaybackProgram = "mplayer";
-
-    QDomNode proxy = preferences.namedItem( "proxyserver" );
-
-    if ( !proxy.isNull() )
     {
-      c.preferences.proxyServer.enabled = ( proxy.toElement().attribute( "enabled" ) == "1" );
-      c.preferences.proxyServer.type = ( ProxyServer::Type ) proxy.namedItem( "type" ).toElement().text().toULong();
-      c.preferences.proxyServer.host = proxy.namedItem( "host" ).toElement().text();
-      c.preferences.proxyServer.port = proxy.namedItem( "port" ).toElement().text().toULong();
-      c.preferences.proxyServer.user = proxy.namedItem( "user" ).toElement().text();
-      c.preferences.proxyServer.password = proxy.namedItem( "password" ).toElement().text();
+        // We need to replace all %PROGRAMDIR% with the program data dir
+        QByteArray data = configFile.readAll();
+        data.replace( "%PROGRAMDIR%", getProgramDataDir().toUtf8() );
+        QBuffer bufferedData( &data );
+
+        if ( !dd.setContent( &bufferedData, false, &errorStr, &errorLine, &errorColumn ) )
+        {
+            printf( "Error: %s at %d,%d\n", errorStr.toLocal8Bit().constData(),  errorLine,  errorColumn );
+            throw exMalformedConfigFile();
+        }
     }
 
-    if ( !preferences.namedItem( "checkForNewReleases" ).isNull() )
-      c.preferences.checkForNewReleases = ( preferences.namedItem( "checkForNewReleases" ).toElement().text() == "1" );
+    configFile.close();
+    QDomNode root = dd.namedItem( "config" );
+    Class c;
+    QDomNode paths = root.namedItem( "paths" );
 
-    if ( !preferences.namedItem( "disallowContentFromOtherSites" ).isNull() )
-      c.preferences.disallowContentFromOtherSites = ( preferences.namedItem( "disallowContentFromOtherSites" ).toElement().text() == "1" );
-  }
+    if ( !paths.isNull() )
+    {
+        QDomNodeList nl = paths.toElement().elementsByTagName( "path" );
 
-  c.lastMainGroupId = root.namedItem( "lastMainGroupId" ).toElement().text().toUInt();
-  c.lastPopupGroupId = root.namedItem( "lastPopupGroupId" ).toElement().text().toUInt();
+        for ( unsigned x = 0; x < nl.length(); ++x )
+            c.paths.push_back(
+                Path( nl.item( x ).toElement().text(),
+                      nl.item( x ).toElement().attribute( "recursive" ) == "1" ) );
+    }
 
-  QDomNode popupWindowState = root.namedItem( "popupWindowState" );
+    QDomNode soundDirs = root.namedItem( "sounddirs" );
 
-  if ( !popupWindowState.isNull() )
-    c.popupWindowState = QByteArray::fromBase64( popupWindowState.toElement().text().toLatin1() );
+    if ( !soundDirs.isNull() )
+    {
+        QDomNodeList nl = soundDirs.toElement().elementsByTagName( "sounddir" );
 
-  QDomNode popupWindowGeometry = root.namedItem( "popupWindowGeometry" );
+        for ( unsigned x = 0; x < nl.length(); ++x )
+            c.soundDirs.push_back(
+                SoundDir( nl.item( x ).toElement().text(),
+                          nl.item( x ).toElement().attribute( "name" ) ) );
+    }
 
-  if ( !popupWindowGeometry.isNull() )
-    c.popupWindowGeometry = QByteArray::fromBase64( popupWindowGeometry.toElement().text().toLatin1() );
+    QDomNode dictionaryOrder = root.namedItem( "dictionaryOrder" );
 
-  QDomNode mainWindowState = root.namedItem( "mainWindowState" );
+    if ( !dictionaryOrder.isNull() )
+        c.dictionaryOrder = loadGroup( dictionaryOrder.toElement() );
 
-  if ( !mainWindowState.isNull() )
-    c.mainWindowState = QByteArray::fromBase64( mainWindowState.toElement().text().toLatin1() );
+    QDomNode inactiveDictionaries = root.namedItem( "inactiveDictionaries" );
 
-  QDomNode mainWindowGeometry = root.namedItem( "mainWindowGeometry" );
+    if ( !inactiveDictionaries.isNull() )
+        c.inactiveDictionaries = loadGroup( inactiveDictionaries.toElement() );
 
-  if ( !mainWindowGeometry.isNull() )
-    c.mainWindowGeometry = QByteArray::fromBase64( mainWindowGeometry.toElement().text().toLatin1() );
+    QDomNode groups = root.namedItem( "groups" );
 
-  QDomNode timeForNewReleaseCheck = root.namedItem( "timeForNewReleaseCheck" );
+    if ( !groups.isNull() )
+    {
+        c.groups.nextId = groups.toElement().attribute( "nextId", "1" ).toUInt();
+        QDomNodeList nl = groups.toElement().elementsByTagName( "group" );
 
-  if ( !timeForNewReleaseCheck.isNull() )
-    c.timeForNewReleaseCheck = QDateTime::fromString( timeForNewReleaseCheck.toElement().text(),
-                                                      Qt::ISODate );
+        for ( unsigned x = 0; x < nl.length(); ++x )
+        {
+            QDomElement grp = nl.item( x ).toElement();
+            c.groups.push_back( loadGroup( grp, &c.groups.nextId ) );
+        }
+    }
 
-  c.skippedRelease = root.namedItem( "skippedRelease" ).toElement().text();
+    QDomNode hunspell = root.namedItem( "hunspell" );
 
-  c.showingDictBarNames = ( root.namedItem( "showingDictBarNames" ).toElement().text() == "1" );
+    if ( !hunspell.isNull() )
+    {
+        c.hunspell.dictionariesPath = hunspell.toElement().attribute( "dictionariesPath" );
+        QDomNodeList nl = hunspell.toElement().elementsByTagName( "enabled" );
 
-  return c;
+        for ( unsigned x = 0; x < nl.length(); ++x )
+            c.hunspell.enabledDictionaries.push_back( nl.item( x ).toElement().text() );
+    }
+
+    QDomNode transliteration = root.namedItem( "transliteration" );
+
+    if ( !transliteration.isNull() )
+    {
+        applyBoolOption( c.transliteration.enableRussianTransliteration,
+                         transliteration.namedItem( "enableRussianTransliteration" ) );
+        applyBoolOption( c.transliteration.enableGermanTransliteration,
+                         transliteration.namedItem( "enableGermanTransliteration" ) );
+        applyBoolOption( c.transliteration.enableGreekTransliteration,
+                         transliteration.namedItem( "enableGreekTransliteration" ) );
+        QDomNode romaji = transliteration.namedItem( "romaji" );
+
+        if ( !romaji.isNull() )
+        {
+            applyBoolOption( c.transliteration.romaji.enable, romaji.namedItem( "enable" ) );
+            applyBoolOption( c.transliteration.romaji.enableHepburn, romaji.namedItem( "enableHepburn" ) );
+            applyBoolOption( c.transliteration.romaji.enableNihonShiki, romaji.namedItem( "enableNihonShiki" ) );
+            applyBoolOption( c.transliteration.romaji.enableKunreiShiki, romaji.namedItem( "enableKunreiShiki" ) );
+            applyBoolOption( c.transliteration.romaji.enableHiragana, romaji.namedItem( "enableHiragana" ) );
+            applyBoolOption( c.transliteration.romaji.enableKatakana, romaji.namedItem( "enableKatakana" ) );
+        }
+    }
+
+    QDomNode forvo = root.namedItem( "forvo" );
+
+    if ( !forvo.isNull() )
+    {
+        applyBoolOption( c.forvo.enable,
+                         forvo.namedItem( "enable" ) );
+        c.forvo.apiKey = forvo.namedItem( "apiKey" ).toElement().text();
+        c.forvo.languageCodes = forvo.namedItem( "languageCodes" ).toElement().text();
+    }
+    else
+        c.forvo.languageCodes = "en, ru"; // Default demo values
+
+    QDomNode mws = root.namedItem( "mediawikis" );
+
+    if ( !mws.isNull() )
+    {
+        QDomNodeList nl = mws.toElement().elementsByTagName( "mediawiki" );
+
+        for ( unsigned x = 0; x < nl.length(); ++x )
+        {
+            QDomElement mw = nl.item( x ).toElement();
+            MediaWiki w;
+            w.id = mw.attribute( "id" );
+            w.name = mw.attribute( "name" );
+            w.url = mw.attribute( "url" );
+            w.enabled = ( mw.attribute( "enabled" ) == "1" );
+            c.mediawikis.push_back( w );
+        }
+    }
+    else
+    {
+        // When upgrading, populate the list with some choices, but don't enable
+        // anything.
+        c.mediawikis = makeDefaultMediaWikis( false );
+    }
+
+    QDomNode wss = root.namedItem( "websites" );
+
+    if ( !wss.isNull() )
+    {
+        QDomNodeList nl = wss.toElement().elementsByTagName( "website" );
+
+        for ( unsigned x = 0; x < nl.length(); ++x )
+        {
+            QDomElement ws = nl.item( x ).toElement();
+            WebSite w;
+            w.id = ws.attribute( "id" );
+            w.name = ws.attribute( "name" );
+            w.url = ws.attribute( "url" );
+            w.enabled = ( ws.attribute( "enabled" ) == "1" );
+            c.webSites.push_back( w );
+        }
+    }
+    else
+    {
+        // Upgrading
+        c.webSites = makeDefaultWebSites();
+    }
+
+    c.mutedDictionaries = loadMutedDictionaries( root.namedItem( "mutedDictionaries" ) );
+    c.popupMutedDictionaries = loadMutedDictionaries( root.namedItem( "popupMutedDictionaries" ) );
+    QDomNode preferences = root.namedItem( "preferences" );
+
+    if ( !preferences.isNull() )
+    {
+        c.preferences.interfaceLanguage = preferences.namedItem( "interfaceLanguage" ).toElement().text();
+        c.preferences.displayStyle = preferences.namedItem( "displayStyle" ).toElement().text();
+        c.preferences.newTabsOpenAfterCurrentOne = ( preferences.namedItem( "newTabsOpenAfterCurrentOne" ).toElement().text() == "1" );
+        c.preferences.newTabsOpenInBackground = ( preferences.namedItem( "newTabsOpenInBackground" ).toElement().text() == "1" );
+        c.preferences.enableTrayIcon = ( preferences.namedItem( "enableTrayIcon" ).toElement().text() == "1" );
+        c.preferences.startToTray = ( preferences.namedItem( "startToTray" ).toElement().text() == "1" );
+        c.preferences.closeToTray = ( preferences.namedItem( "closeToTray" ).toElement().text() == "1" );
+        c.preferences.autoStart = ( preferences.namedItem( "autoStart" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "doubleClickTranslates" ).isNull() )
+            c.preferences.doubleClickTranslates = ( preferences.namedItem( "doubleClickTranslates" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "zoomFactor" ).isNull() )
+            c.preferences.zoomFactor = preferences.namedItem( "zoomFactor" ).toElement().text().toDouble();
+
+        if ( !preferences.namedItem( "wordsZoomLevel" ).isNull() )
+            c.preferences.wordsZoomLevel = preferences.namedItem( "wordsZoomLevel" ).toElement().text().toInt();
+
+        applyBoolOption( c.preferences.enableMainWindowHotkey, preferences.namedItem( "enableMainWindowHotkey" ) );
+
+        if ( !preferences.namedItem( "mainWindowHotkey" ).isNull() )
+            c.preferences.mainWindowHotkey = QKeySequence::fromString( preferences.namedItem( "mainWindowHotkey" ).toElement().text() );
+
+        applyBoolOption( c.preferences.enableClipboardHotkey, preferences.namedItem( "enableClipboardHotkey" ) );
+
+        if ( !preferences.namedItem( "clipboardHotkey" ).isNull() )
+            c.preferences.clipboardHotkey = QKeySequence::fromString( preferences.namedItem( "clipboardHotkey" ).toElement().text() );
+
+        c.preferences.enableScanPopup = ( preferences.namedItem( "enableScanPopup" ).toElement().text() == "1" );
+        c.preferences.startWithScanPopupOn = ( preferences.namedItem( "startWithScanPopupOn" ).toElement().text() == "1" );
+        c.preferences.enableScanPopupModifiers = ( preferences.namedItem( "enableScanPopupModifiers" ).toElement().text() == "1" );
+        c.preferences.scanPopupModifiers = ( preferences.namedItem( "scanPopupModifiers" ).toElement().text().toULong() );
+        c.preferences.scanPopupAltMode = ( preferences.namedItem( "scanPopupAltMode" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "scanPopupAltModeSecs" ).isNull() )
+            c.preferences.scanPopupAltModeSecs = preferences.namedItem( "scanPopupAltModeSecs" ).toElement().text().toUInt();
+
+        c.preferences.pronounceOnLoadMain = ( preferences.namedItem( "pronounceOnLoadMain" ).toElement().text() == "1" );
+        c.preferences.pronounceOnLoadPopup = ( preferences.namedItem( "pronounceOnLoadPopup" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "useExternalPlayer" ).isNull() )
+            c.preferences.useExternalPlayer = ( preferences.namedItem( "useExternalPlayer" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "useWindowsPlaySound" ).isNull() )
+            c.preferences.useWindowsPlaySound = ( preferences.namedItem( "useWindowsPlaySound" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "audioPlaybackProgram" ).isNull() )
+            c.preferences.audioPlaybackProgram = preferences.namedItem( "audioPlaybackProgram" ).toElement().text();
+        else
+            c.preferences.audioPlaybackProgram = "mplayer";
+
+        QDomNode proxy = preferences.namedItem( "proxyserver" );
+
+        if ( !proxy.isNull() )
+        {
+            c.preferences.proxyServer.enabled = ( proxy.toElement().attribute( "enabled" ) == "1" );
+            c.preferences.proxyServer.type = ( ProxyServer::Type ) proxy.namedItem( "type" ).toElement().text().toULong();
+            c.preferences.proxyServer.host = proxy.namedItem( "host" ).toElement().text();
+            c.preferences.proxyServer.port = proxy.namedItem( "port" ).toElement().text().toULong();
+            c.preferences.proxyServer.user = proxy.namedItem( "user" ).toElement().text();
+            c.preferences.proxyServer.password = proxy.namedItem( "password" ).toElement().text();
+        }
+
+        if ( !preferences.namedItem( "checkForNewReleases" ).isNull() )
+            c.preferences.checkForNewReleases = ( preferences.namedItem( "checkForNewReleases" ).toElement().text() == "1" );
+
+        if ( !preferences.namedItem( "disallowContentFromOtherSites" ).isNull() )
+            c.preferences.disallowContentFromOtherSites = ( preferences.namedItem( "disallowContentFromOtherSites" ).toElement().text() == "1" );
+    }
+
+    c.lastMainGroupId = root.namedItem( "lastMainGroupId" ).toElement().text().toUInt();
+    c.lastPopupGroupId = root.namedItem( "lastPopupGroupId" ).toElement().text().toUInt();
+    QDomNode popupWindowState = root.namedItem( "popupWindowState" );
+
+    if ( !popupWindowState.isNull() )
+        c.popupWindowState = QByteArray::fromBase64( popupWindowState.toElement().text().toLatin1() );
+
+    QDomNode popupWindowGeometry = root.namedItem( "popupWindowGeometry" );
+
+    if ( !popupWindowGeometry.isNull() )
+        c.popupWindowGeometry = QByteArray::fromBase64( popupWindowGeometry.toElement().text().toLatin1() );
+
+    QDomNode mainWindowState = root.namedItem( "mainWindowState" );
+
+    if ( !mainWindowState.isNull() )
+        c.mainWindowState = QByteArray::fromBase64( mainWindowState.toElement().text().toLatin1() );
+
+    QDomNode mainWindowGeometry = root.namedItem( "mainWindowGeometry" );
+
+    if ( !mainWindowGeometry.isNull() )
+        c.mainWindowGeometry = QByteArray::fromBase64( mainWindowGeometry.toElement().text().toLatin1() );
+
+    QDomNode timeForNewReleaseCheck = root.namedItem( "timeForNewReleaseCheck" );
+
+    if ( !timeForNewReleaseCheck.isNull() )
+        c.timeForNewReleaseCheck = QDateTime::fromString( timeForNewReleaseCheck.toElement().text(),
+                                   Qt::ISODate );
+
+    c.skippedRelease = root.namedItem( "skippedRelease" ).toElement().text();
+    c.showingDictBarNames = ( root.namedItem( "showingDictBarNames" ).toElement().text() == "1" );
+    return c;
 }
 
-namespace {
-void saveGroup( Group const & data, QDomElement & group )
+namespace
 {
-  QDomDocument dd = group.ownerDocument();
-
-  QDomAttr id = dd.createAttribute( "id" );
-
-  id.setValue( QString::number( data.id ) );
-
-  group.setAttributeNode( id );
-
-  QDomAttr name = dd.createAttribute( "name" );
-
-  name.setValue( data.name );
-
-  group.setAttributeNode( name );
-
-  if ( data.icon.size() )
-  {
-    QDomAttr icon = dd.createAttribute( "icon" );
-
-    icon.setValue( data.icon );
-
-    group.setAttributeNode( icon );
-  }
-
-  if ( data.iconData.size() )
-  {
-    QDomAttr iconData = dd.createAttribute( "iconData" );
-
-    iconData.setValue( QString::fromAscii( data.iconData.toBase64() ) );
-
-    group.setAttributeNode( iconData );
-  }
-
-  if ( !data.shortcut.isEmpty() )
-  {
-    QDomAttr shortcut = dd.createAttribute( "shortcut" );
-
-    shortcut.setValue(  data.shortcut.toString() );
-
-    group.setAttributeNode( shortcut );
-  }
-
-  for( vector< DictionaryRef >::const_iterator j = data.dictionaries.begin(); j != data.dictionaries.end(); ++j )
-  {
-    QDomElement dictionary = dd.createElement( "dictionary" );
-
-    group.appendChild( dictionary );
-
-    QDomText value = dd.createTextNode( j->id );
-
-    dictionary.appendChild( value );
-
+void saveGroup( Group const &data, QDomElement &group )
+{
+    QDomDocument dd = group.ownerDocument();
+    QDomAttr id = dd.createAttribute( "id" );
+    id.setValue( QString::number( data.id ) );
+    group.setAttributeNode( id );
     QDomAttr name = dd.createAttribute( "name" );
+    name.setValue( data.name );
+    group.setAttributeNode( name );
 
-    name.setValue( j->name );
+    if ( data.icon.size() )
+    {
+        QDomAttr icon = dd.createAttribute( "icon" );
+        icon.setValue( data.icon );
+        group.setAttributeNode( icon );
+    }
 
-    dictionary.setAttributeNode( name );
-  }
+    if ( data.iconData.size() )
+    {
+        QDomAttr iconData = dd.createAttribute( "iconData" );
+        iconData.setValue( QString::fromAscii( data.iconData.toBase64() ) );
+        group.setAttributeNode( iconData );
+    }
+
+    if ( !data.shortcut.isEmpty() )
+    {
+        QDomAttr shortcut = dd.createAttribute( "shortcut" );
+        shortcut.setValue( data.shortcut.toString() );
+        group.setAttributeNode( shortcut );
+    }
+
+    for ( vector< DictionaryRef >::const_iterator j = data.dictionaries.begin(); j != data.dictionaries.end(); ++j )
+    {
+        QDomElement dictionary = dd.createElement( "dictionary" );
+        group.appendChild( dictionary );
+        QDomText value = dd.createTextNode( j->id );
+        dictionary.appendChild( value );
+        QDomAttr name = dd.createAttribute( "name" );
+        name.setValue( j->name );
+        dictionary.setAttributeNode( name );
+    }
 }
 
 }
 
-void save( Class const & c ) throw( exError )
+void save( Class const &c ) throw( exError )
 {
-  QFile configFile( getConfigFileName() + ".tmp" );
+    QFile configFile( getConfigFileName() + ".tmp" );
 
-  if ( !configFile.open( QFile::WriteOnly ) )
-    throw exCantWriteConfigFile();
+    if ( !configFile.open( QFile::WriteOnly ) )
+        throw exCantWriteConfigFile();
 
-  QDomDocument dd;
-
-  QDomElement root = dd.createElement( "config" );
-  dd.appendChild( root );
-
-  {
-    QDomElement paths = dd.createElement( "paths" );
-    root.appendChild( paths );
-
-    for( Paths::const_iterator i = c.paths.begin(); i != c.paths.end(); ++i )
+    QDomDocument dd;
+    QDomElement root = dd.createElement( "config" );
+    dd.appendChild( root );
     {
-      QDomElement path = dd.createElement( "path" );
-      paths.appendChild( path );
+        QDomElement paths = dd.createElement( "paths" );
+        root.appendChild( paths );
 
-      QDomAttr recursive = dd.createAttribute( "recursive" );
-      recursive.setValue( i->recursive ? "1" : "0" );
-      path.setAttributeNode( recursive );
-
-      QDomText value = dd.createTextNode( i->path );
-
-      path.appendChild( value );
+        for ( Paths::const_iterator i = c.paths.begin(); i != c.paths.end(); ++i )
+        {
+            QDomElement path = dd.createElement( "path" );
+            paths.appendChild( path );
+            QDomAttr recursive = dd.createAttribute( "recursive" );
+            recursive.setValue( i->recursive ? "1" : "0" );
+            path.setAttributeNode( recursive );
+            QDomText value = dd.createTextNode( i->path );
+            path.appendChild( value );
+        }
     }
-  }
-
-  {
-    QDomElement soundDirs = dd.createElement( "sounddirs" );
-    root.appendChild( soundDirs );
-
-    for( SoundDirs::const_iterator i = c.soundDirs.begin(); i != c.soundDirs.end(); ++i )
     {
-      QDomElement soundDir = dd.createElement( "sounddir" );
-      soundDirs.appendChild( soundDir );
+        QDomElement soundDirs = dd.createElement( "sounddirs" );
+        root.appendChild( soundDirs );
 
-      QDomAttr name = dd.createAttribute( "name" );
-      name.setValue( i->name );
-      soundDir.setAttributeNode( name );
-
-      QDomText value = dd.createTextNode( i->path );
-
-      soundDir.appendChild( value );
+        for ( SoundDirs::const_iterator i = c.soundDirs.begin(); i != c.soundDirs.end(); ++i )
+        {
+            QDomElement soundDir = dd.createElement( "sounddir" );
+            soundDirs.appendChild( soundDir );
+            QDomAttr name = dd.createAttribute( "name" );
+            name.setValue( i->name );
+            soundDir.setAttributeNode( name );
+            QDomText value = dd.createTextNode( i->path );
+            soundDir.appendChild( value );
+        }
     }
-  }
-
-  {
-    QDomElement dictionaryOrder = dd.createElement( "dictionaryOrder" );
-    root.appendChild( dictionaryOrder );
-    saveGroup( c.dictionaryOrder, dictionaryOrder );
-  }
-
-  {
-    QDomElement inactiveDictionaries = dd.createElement( "inactiveDictionaries" );
-    root.appendChild( inactiveDictionaries );
-    saveGroup( c.inactiveDictionaries, inactiveDictionaries );
-  }
-
-  {
-    QDomElement groups = dd.createElement( "groups" );
-    root.appendChild( groups );
-
-    QDomAttr nextId = dd.createAttribute( "nextId" );
-    nextId.setValue( QString::number( c.groups.nextId ) );
-    groups.setAttributeNode( nextId );
-
-    for( Groups::const_iterator i = c.groups.begin(); i != c.groups.end(); ++i )
     {
-      QDomElement group = dd.createElement( "group" );
-      groups.appendChild( group );
-
-      saveGroup( *i, group );
+        QDomElement dictionaryOrder = dd.createElement( "dictionaryOrder" );
+        root.appendChild( dictionaryOrder );
+        saveGroup( c.dictionaryOrder, dictionaryOrder );
     }
-  }
-
-  {
-    QDomElement hunspell = dd.createElement( "hunspell" );
-    QDomAttr path = dd.createAttribute( "dictionariesPath" );
-    path.setValue( c.hunspell.dictionariesPath );
-    hunspell.setAttributeNode( path );
-    root.appendChild( hunspell );
-
-    for( unsigned x = 0; x < c.hunspell.enabledDictionaries.size(); ++x )
     {
-      QDomElement en = dd.createElement( "enabled" );
-      QDomText value = dd.createTextNode( c.hunspell.enabledDictionaries[ x ] );
-
-      en.appendChild( value );
-      hunspell.appendChild( en );
+        QDomElement inactiveDictionaries = dd.createElement( "inactiveDictionaries" );
+        root.appendChild( inactiveDictionaries );
+        saveGroup( c.inactiveDictionaries, inactiveDictionaries );
     }
-  }
-
-  {
-    // Russian translit
-
-    QDomElement transliteration = dd.createElement( "transliteration" );
-    root.appendChild( transliteration );
-
-    QDomElement opt = dd.createElement( "enableRussianTransliteration" );
-    opt.appendChild( dd.createTextNode( c.transliteration.enableRussianTransliteration ? "1":"0" ) );
-    transliteration.appendChild( opt );
-
-    // German translit
-
-    opt = dd.createElement( "enableGermanTransliteration" );
-    opt.appendChild( dd.createTextNode( c.transliteration.enableGermanTransliteration ? "1":"0" ) );
-    transliteration.appendChild( opt );
-
-    // Greek translit
-
-    opt = dd.createElement( "enableGreekTransliteration" );
-    opt.appendChild( dd.createTextNode( c.transliteration.enableGreekTransliteration ? "1":"0" ) );
-    transliteration.appendChild( opt );
-
-    // Romaji
-
-    QDomElement romaji = dd.createElement( "romaji" );
-    transliteration.appendChild( romaji );
-
-    opt = dd.createElement( "enable" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enable ? "1":"0" ) );
-    romaji.appendChild( opt );
-
-    opt = dd.createElement( "enableHepburn" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableHepburn ? "1":"0" ) );
-    romaji.appendChild( opt );
-
-    opt = dd.createElement( "enableNihonShiki" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableNihonShiki ? "1":"0" ) );
-    romaji.appendChild( opt );
-
-    opt = dd.createElement( "enableKunreiShiki" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableKunreiShiki ? "1":"0" ) );
-    romaji.appendChild( opt );
-
-    opt = dd.createElement( "enableHiragana" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableHiragana ? "1":"0" ) );
-    romaji.appendChild( opt );
-
-    opt = dd.createElement( "enableKatakana" );
-    opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableKatakana ? "1":"0" ) );
-    romaji.appendChild( opt );
-  }
-
-  {
-    // Forvo
-
-    QDomElement forvo = dd.createElement( "forvo" );
-    root.appendChild( forvo );
-
-    QDomElement opt = dd.createElement( "enable" );
-    opt.appendChild( dd.createTextNode( c.forvo.enable ? "1":"0" ) );
-    forvo.appendChild( opt );
-
-    opt = dd.createElement( "apiKey" );
-    opt.appendChild( dd.createTextNode( c.forvo.apiKey ) );
-    forvo.appendChild( opt );
-
-    opt = dd.createElement( "languageCodes" );
-    opt.appendChild( dd.createTextNode( c.forvo.languageCodes ) );
-    forvo.appendChild( opt );
-  }
-
-  {
-    QDomElement mws = dd.createElement( "mediawikis" );
-    root.appendChild( mws );
-
-    for( MediaWikis::const_iterator i = c.mediawikis.begin(); i != c.mediawikis.end(); ++i )
     {
-      QDomElement mw = dd.createElement( "mediawiki" );
-      mws.appendChild( mw );
+        QDomElement groups = dd.createElement( "groups" );
+        root.appendChild( groups );
+        QDomAttr nextId = dd.createAttribute( "nextId" );
+        nextId.setValue( QString::number( c.groups.nextId ) );
+        groups.setAttributeNode( nextId );
 
-      QDomAttr id = dd.createAttribute( "id" );
-      id.setValue( i->id );
-      mw.setAttributeNode( id );
-
-      QDomAttr name = dd.createAttribute( "name" );
-      name.setValue( i->name );
-      mw.setAttributeNode( name );
-
-      QDomAttr url = dd.createAttribute( "url" );
-      url.setValue( i->url );
-      mw.setAttributeNode( url );
-
-      QDomAttr enabled = dd.createAttribute( "enabled" );
-      enabled.setValue( i->enabled ? "1" : "0" );
-      mw.setAttributeNode( enabled );
+        for ( Groups::const_iterator i = c.groups.begin(); i != c.groups.end(); ++i )
+        {
+            QDomElement group = dd.createElement( "group" );
+            groups.appendChild( group );
+            saveGroup( *i, group );
+        }
     }
-  }
-
-  {
-    QDomElement wss = dd.createElement( "websites" );
-    root.appendChild( wss );
-
-    for( WebSites::const_iterator i = c.webSites.begin(); i != c.webSites.end(); ++i )
     {
-      QDomElement ws = dd.createElement( "website" );
-      wss.appendChild( ws );
+        QDomElement hunspell = dd.createElement( "hunspell" );
+        QDomAttr path = dd.createAttribute( "dictionariesPath" );
+        path.setValue( c.hunspell.dictionariesPath );
+        hunspell.setAttributeNode( path );
+        root.appendChild( hunspell );
 
-      QDomAttr id = dd.createAttribute( "id" );
-      id.setValue( i->id );
-      ws.setAttributeNode( id );
-
-      QDomAttr name = dd.createAttribute( "name" );
-      name.setValue( i->name );
-      ws.setAttributeNode( name );
-
-      QDomAttr url = dd.createAttribute( "url" );
-      url.setValue( i->url );
-      ws.setAttributeNode( url );
-
-      QDomAttr enabled = dd.createAttribute( "enabled" );
-      enabled.setValue( i->enabled ? "1" : "0" );
-      ws.setAttributeNode( enabled );
+        for ( unsigned x = 0; x < c.hunspell.enabledDictionaries.size(); ++x )
+        {
+            QDomElement en = dd.createElement( "enabled" );
+            QDomText value = dd.createTextNode( c.hunspell.enabledDictionaries[ x ] );
+            en.appendChild( value );
+            hunspell.appendChild( en );
+        }
     }
-  }
-
-
-  {
-    QDomElement muted = dd.createElement( "mutedDictionaries" );
-    root.appendChild( muted );
-    saveMutedDictionaries( dd, muted, c.mutedDictionaries );
-  }
-
-  {
-    QDomElement muted = dd.createElement( "popupMutedDictionaries" );
-    root.appendChild( muted );
-    saveMutedDictionaries( dd, muted, c.popupMutedDictionaries );
-  }
-
-  {
-    QDomElement preferences = dd.createElement( "preferences" );
-    root.appendChild( preferences );
-
-    QDomElement opt = dd.createElement( "interfaceLanguage" );
-    opt.appendChild( dd.createTextNode( c.preferences.interfaceLanguage ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "displayStyle" );
-    opt.appendChild( dd.createTextNode( c.preferences.displayStyle ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "newTabsOpenAfterCurrentOne" );
-    opt.appendChild( dd.createTextNode( c.preferences.newTabsOpenAfterCurrentOne ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "newTabsOpenInBackground" );
-    opt.appendChild( dd.createTextNode( c.preferences.newTabsOpenInBackground ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "enableTrayIcon" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableTrayIcon ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "startToTray" );
-    opt.appendChild( dd.createTextNode( c.preferences.startToTray ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "closeToTray" );
-    opt.appendChild( dd.createTextNode( c.preferences.closeToTray ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "autoStart" );
-    opt.appendChild( dd.createTextNode( c.preferences.autoStart ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "doubleClickTranslates" );
-    opt.appendChild( dd.createTextNode( c.preferences.doubleClickTranslates ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "zoomFactor" );
-    opt.appendChild( dd.createTextNode( QString::number( c.preferences.zoomFactor ) ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "wordsZoomLevel" );
-    opt.appendChild( dd.createTextNode( QString::number( c.preferences.wordsZoomLevel ) ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "enableMainWindowHotkey" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableMainWindowHotkey ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "mainWindowHotkey" );
-    opt.appendChild( dd.createTextNode( c.preferences.mainWindowHotkey.toKeySequence().toString() ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "enableClipboardHotkey" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableClipboardHotkey ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "clipboardHotkey" );
-    opt.appendChild( dd.createTextNode( c.preferences.clipboardHotkey.toKeySequence().toString() ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "enableScanPopup" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableScanPopup ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "startWithScanPopupOn" );
-    opt.appendChild( dd.createTextNode( c.preferences.startWithScanPopupOn ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "enableScanPopupModifiers" );
-    opt.appendChild( dd.createTextNode( c.preferences.enableScanPopupModifiers ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "scanPopupModifiers" );
-    opt.appendChild( dd.createTextNode( QString::number( c.preferences.scanPopupModifiers ) ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "scanPopupAltMode" );
-    opt.appendChild( dd.createTextNode( c.preferences.scanPopupAltMode ? "1":"0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "scanPopupAltModeSecs" );
-    opt.appendChild( dd.createTextNode( QString::number( c.preferences.scanPopupAltModeSecs ) ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "pronounceOnLoadMain" );
-    opt.appendChild( dd.createTextNode( c.preferences.pronounceOnLoadMain ? "1" : "0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "pronounceOnLoadPopup" );
-    opt.appendChild( dd.createTextNode( c.preferences.pronounceOnLoadPopup ? "1" : "0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "useExternalPlayer" );
-    opt.appendChild( dd.createTextNode( c.preferences.useExternalPlayer ? "1" : "0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "useWindowsPlaySound" );
-    opt.appendChild( dd.createTextNode( c.preferences.useWindowsPlaySound ? "1" : "0" ) );
-    preferences.appendChild( opt );
-
-    opt = dd.createElement( "audioPlaybackProgram" );
-    opt.appendChild( dd.createTextNode( c.preferences.audioPlaybackProgram ) );
-    preferences.appendChild( opt );
-
     {
-      QDomElement proxy = dd.createElement( "proxyserver" );
-      preferences.appendChild( proxy );
-
-      QDomAttr enabled = dd.createAttribute( "enabled" );
-      enabled.setValue( c.preferences.proxyServer.enabled ? "1" : "0" );
-      proxy.setAttributeNode( enabled );
-
-      opt = dd.createElement( "type" );
-      opt.appendChild( dd.createTextNode( QString::number( c.preferences.proxyServer.type ) ) );
-      proxy.appendChild( opt );
-
-      opt = dd.createElement( "host" );
-      opt.appendChild( dd.createTextNode( c.preferences.proxyServer.host ) );
-      proxy.appendChild( opt );
-
-      opt = dd.createElement( "port" );
-      opt.appendChild( dd.createTextNode( QString::number( c.preferences.proxyServer.port ) ) );
-      proxy.appendChild( opt );
-
-      opt = dd.createElement( "user" );
-      opt.appendChild( dd.createTextNode( c.preferences.proxyServer.user ) );
-      proxy.appendChild( opt );
-
-      opt = dd.createElement( "password" );
-      opt.appendChild( dd.createTextNode( c.preferences.proxyServer.password ) );
-      proxy.appendChild( opt );
+        // Russian translit
+        QDomElement transliteration = dd.createElement( "transliteration" );
+        root.appendChild( transliteration );
+        QDomElement opt = dd.createElement( "enableRussianTransliteration" );
+        opt.appendChild( dd.createTextNode( c.transliteration.enableRussianTransliteration ? "1" : "0" ) );
+        transliteration.appendChild( opt );
+        // German translit
+        opt = dd.createElement( "enableGermanTransliteration" );
+        opt.appendChild( dd.createTextNode( c.transliteration.enableGermanTransliteration ? "1" : "0" ) );
+        transliteration.appendChild( opt );
+        // Greek translit
+        opt = dd.createElement( "enableGreekTransliteration" );
+        opt.appendChild( dd.createTextNode( c.transliteration.enableGreekTransliteration ? "1" : "0" ) );
+        transliteration.appendChild( opt );
+        // Romaji
+        QDomElement romaji = dd.createElement( "romaji" );
+        transliteration.appendChild( romaji );
+        opt = dd.createElement( "enable" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enable ? "1" : "0" ) );
+        romaji.appendChild( opt );
+        opt = dd.createElement( "enableHepburn" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableHepburn ? "1" : "0" ) );
+        romaji.appendChild( opt );
+        opt = dd.createElement( "enableNihonShiki" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableNihonShiki ? "1" : "0" ) );
+        romaji.appendChild( opt );
+        opt = dd.createElement( "enableKunreiShiki" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableKunreiShiki ? "1" : "0" ) );
+        romaji.appendChild( opt );
+        opt = dd.createElement( "enableHiragana" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableHiragana ? "1" : "0" ) );
+        romaji.appendChild( opt );
+        opt = dd.createElement( "enableKatakana" );
+        opt.appendChild( dd.createTextNode( c.transliteration.romaji.enableKatakana ? "1" : "0" ) );
+        romaji.appendChild( opt );
     }
+    {
+        // Forvo
+        QDomElement forvo = dd.createElement( "forvo" );
+        root.appendChild( forvo );
+        QDomElement opt = dd.createElement( "enable" );
+        opt.appendChild( dd.createTextNode( c.forvo.enable ? "1" : "0" ) );
+        forvo.appendChild( opt );
+        opt = dd.createElement( "apiKey" );
+        opt.appendChild( dd.createTextNode( c.forvo.apiKey ) );
+        forvo.appendChild( opt );
+        opt = dd.createElement( "languageCodes" );
+        opt.appendChild( dd.createTextNode( c.forvo.languageCodes ) );
+        forvo.appendChild( opt );
+    }
+    {
+        QDomElement mws = dd.createElement( "mediawikis" );
+        root.appendChild( mws );
 
-    opt = dd.createElement( "checkForNewReleases" );
-    opt.appendChild( dd.createTextNode( c.preferences.checkForNewReleases ? "1" : "0" ) );
-    preferences.appendChild( opt );
+        for ( MediaWikis::const_iterator i = c.mediawikis.begin(); i != c.mediawikis.end(); ++i )
+        {
+            QDomElement mw = dd.createElement( "mediawiki" );
+            mws.appendChild( mw );
+            QDomAttr id = dd.createAttribute( "id" );
+            id.setValue( i->id );
+            mw.setAttributeNode( id );
+            QDomAttr name = dd.createAttribute( "name" );
+            name.setValue( i->name );
+            mw.setAttributeNode( name );
+            QDomAttr url = dd.createAttribute( "url" );
+            url.setValue( i->url );
+            mw.setAttributeNode( url );
+            QDomAttr enabled = dd.createAttribute( "enabled" );
+            enabled.setValue( i->enabled ? "1" : "0" );
+            mw.setAttributeNode( enabled );
+        }
+    }
+    {
+        QDomElement wss = dd.createElement( "websites" );
+        root.appendChild( wss );
 
-    opt = dd.createElement( "disallowContentFromOtherSites" );
-    opt.appendChild( dd.createTextNode( c.preferences.disallowContentFromOtherSites ? "1" : "0" ) );
-    preferences.appendChild( opt );
-  }
+        for ( WebSites::const_iterator i = c.webSites.begin(); i != c.webSites.end(); ++i )
+        {
+            QDomElement ws = dd.createElement( "website" );
+            wss.appendChild( ws );
+            QDomAttr id = dd.createAttribute( "id" );
+            id.setValue( i->id );
+            ws.setAttributeNode( id );
+            QDomAttr name = dd.createAttribute( "name" );
+            name.setValue( i->name );
+            ws.setAttributeNode( name );
+            QDomAttr url = dd.createAttribute( "url" );
+            url.setValue( i->url );
+            ws.setAttributeNode( url );
+            QDomAttr enabled = dd.createAttribute( "enabled" );
+            enabled.setValue( i->enabled ? "1" : "0" );
+            ws.setAttributeNode( enabled );
+        }
+    }
+    {
+        QDomElement muted = dd.createElement( "mutedDictionaries" );
+        root.appendChild( muted );
+        saveMutedDictionaries( dd, muted, c.mutedDictionaries );
+    }
+    {
+        QDomElement muted = dd.createElement( "popupMutedDictionaries" );
+        root.appendChild( muted );
+        saveMutedDictionaries( dd, muted, c.popupMutedDictionaries );
+    }
+    {
+        QDomElement preferences = dd.createElement( "preferences" );
+        root.appendChild( preferences );
+        QDomElement opt = dd.createElement( "interfaceLanguage" );
+        opt.appendChild( dd.createTextNode( c.preferences.interfaceLanguage ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "displayStyle" );
+        opt.appendChild( dd.createTextNode( c.preferences.displayStyle ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "newTabsOpenAfterCurrentOne" );
+        opt.appendChild( dd.createTextNode( c.preferences.newTabsOpenAfterCurrentOne ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "newTabsOpenInBackground" );
+        opt.appendChild( dd.createTextNode( c.preferences.newTabsOpenInBackground ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "enableTrayIcon" );
+        opt.appendChild( dd.createTextNode( c.preferences.enableTrayIcon ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "startToTray" );
+        opt.appendChild( dd.createTextNode( c.preferences.startToTray ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "closeToTray" );
+        opt.appendChild( dd.createTextNode( c.preferences.closeToTray ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "autoStart" );
+        opt.appendChild( dd.createTextNode( c.preferences.autoStart ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "doubleClickTranslates" );
+        opt.appendChild( dd.createTextNode( c.preferences.doubleClickTranslates ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "zoomFactor" );
+        opt.appendChild( dd.createTextNode( QString::number( c.preferences.zoomFactor ) ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "wordsZoomLevel" );
+        opt.appendChild( dd.createTextNode( QString::number( c.preferences.wordsZoomLevel ) ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "enableMainWindowHotkey" );
+        opt.appendChild( dd.createTextNode( c.preferences.enableMainWindowHotkey ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "mainWindowHotkey" );
+        opt.appendChild( dd.createTextNode( c.preferences.mainWindowHotkey.toKeySequence().toString() ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "enableClipboardHotkey" );
+        opt.appendChild( dd.createTextNode( c.preferences.enableClipboardHotkey ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "clipboardHotkey" );
+        opt.appendChild( dd.createTextNode( c.preferences.clipboardHotkey.toKeySequence().toString() ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "enableScanPopup" );
+        opt.appendChild( dd.createTextNode( c.preferences.enableScanPopup ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "startWithScanPopupOn" );
+        opt.appendChild( dd.createTextNode( c.preferences.startWithScanPopupOn ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "enableScanPopupModifiers" );
+        opt.appendChild( dd.createTextNode( c.preferences.enableScanPopupModifiers ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "scanPopupModifiers" );
+        opt.appendChild( dd.createTextNode( QString::number( c.preferences.scanPopupModifiers ) ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "scanPopupAltMode" );
+        opt.appendChild( dd.createTextNode( c.preferences.scanPopupAltMode ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "scanPopupAltModeSecs" );
+        opt.appendChild( dd.createTextNode( QString::number( c.preferences.scanPopupAltModeSecs ) ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "pronounceOnLoadMain" );
+        opt.appendChild( dd.createTextNode( c.preferences.pronounceOnLoadMain ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "pronounceOnLoadPopup" );
+        opt.appendChild( dd.createTextNode( c.preferences.pronounceOnLoadPopup ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "useExternalPlayer" );
+        opt.appendChild( dd.createTextNode( c.preferences.useExternalPlayer ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "useWindowsPlaySound" );
+        opt.appendChild( dd.createTextNode( c.preferences.useWindowsPlaySound ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "audioPlaybackProgram" );
+        opt.appendChild( dd.createTextNode( c.preferences.audioPlaybackProgram ) );
+        preferences.appendChild( opt );
+        {
+            QDomElement proxy = dd.createElement( "proxyserver" );
+            preferences.appendChild( proxy );
+            QDomAttr enabled = dd.createAttribute( "enabled" );
+            enabled.setValue( c.preferences.proxyServer.enabled ? "1" : "0" );
+            proxy.setAttributeNode( enabled );
+            opt = dd.createElement( "type" );
+            opt.appendChild( dd.createTextNode( QString::number( c.preferences.proxyServer.type ) ) );
+            proxy.appendChild( opt );
+            opt = dd.createElement( "host" );
+            opt.appendChild( dd.createTextNode( c.preferences.proxyServer.host ) );
+            proxy.appendChild( opt );
+            opt = dd.createElement( "port" );
+            opt.appendChild( dd.createTextNode( QString::number( c.preferences.proxyServer.port ) ) );
+            proxy.appendChild( opt );
+            opt = dd.createElement( "user" );
+            opt.appendChild( dd.createTextNode( c.preferences.proxyServer.user ) );
+            proxy.appendChild( opt );
+            opt = dd.createElement( "password" );
+            opt.appendChild( dd.createTextNode( c.preferences.proxyServer.password ) );
+            proxy.appendChild( opt );
+        }
+        opt = dd.createElement( "checkForNewReleases" );
+        opt.appendChild( dd.createTextNode( c.preferences.checkForNewReleases ? "1" : "0" ) );
+        preferences.appendChild( opt );
+        opt = dd.createElement( "disallowContentFromOtherSites" );
+        opt.appendChild( dd.createTextNode( c.preferences.disallowContentFromOtherSites ? "1" : "0" ) );
+        preferences.appendChild( opt );
+    }
+    {
+        QDomElement opt = dd.createElement( "lastMainGroupId" );
+        opt.appendChild( dd.createTextNode( QString::number( c.lastMainGroupId ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "lastPopupGroupId" );
+        opt.appendChild( dd.createTextNode( QString::number( c.lastPopupGroupId ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "popupWindowState" );
+        opt.appendChild( dd.createTextNode( QString::fromLatin1( c.popupWindowState.toBase64() ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "popupWindowGeometry" );
+        opt.appendChild( dd.createTextNode( QString::fromLatin1( c.popupWindowGeometry.toBase64() ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "mainWindowState" );
+        opt.appendChild( dd.createTextNode( QString::fromLatin1( c.mainWindowState.toBase64() ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "mainWindowGeometry" );
+        opt.appendChild( dd.createTextNode( QString::fromLatin1( c.mainWindowGeometry.toBase64() ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "timeForNewReleaseCheck" );
+        opt.appendChild( dd.createTextNode( c.timeForNewReleaseCheck.toString( Qt::ISODate ) ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "skippedRelease" );
+        opt.appendChild( dd.createTextNode( c.skippedRelease ) );
+        root.appendChild( opt );
+        opt = dd.createElement( "showingDictBarNames" );
+        opt.appendChild( dd.createTextNode( c.showingDictBarNames ? "1" : "0" ) );
+        root.appendChild( opt );
+    }
+    QByteArray result( dd.toByteArray() );
 
-  {
-    QDomElement opt = dd.createElement( "lastMainGroupId" );
-    opt.appendChild( dd.createTextNode( QString::number( c.lastMainGroupId ) ) );
-    root.appendChild( opt );
+    if ( configFile.write( result ) != result.size() )
+        throw exCantWriteConfigFile();
 
-    opt = dd.createElement( "lastPopupGroupId" );
-    opt.appendChild( dd.createTextNode( QString::number( c.lastPopupGroupId ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "popupWindowState" );
-    opt.appendChild( dd.createTextNode( QString::fromLatin1( c.popupWindowState.toBase64() ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "popupWindowGeometry" );
-    opt.appendChild( dd.createTextNode( QString::fromLatin1( c.popupWindowGeometry.toBase64() ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "mainWindowState" );
-    opt.appendChild( dd.createTextNode( QString::fromLatin1( c.mainWindowState.toBase64() ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "mainWindowGeometry" );
-    opt.appendChild( dd.createTextNode( QString::fromLatin1( c.mainWindowGeometry.toBase64() ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "timeForNewReleaseCheck" );
-    opt.appendChild( dd.createTextNode( c.timeForNewReleaseCheck.toString( Qt::ISODate ) ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "skippedRelease" );
-    opt.appendChild( dd.createTextNode( c.skippedRelease ) );
-    root.appendChild( opt );
-
-    opt = dd.createElement( "showingDictBarNames" );
-    opt.appendChild( dd.createTextNode( c.showingDictBarNames ? "1" : "0" ) );
-    root.appendChild( opt );
-  }
-
-  QByteArray result( dd.toByteArray() );
-
-  if ( configFile.write( result ) != result.size() )
-    throw exCantWriteConfigFile();
-
-  configFile.close();
-
-  renameAtomically( configFile.fileName(), getConfigFileName() );
+    configFile.close();
+    renameAtomically( configFile.fileName(), getConfigFileName() );
 }
 
 QString getIndexDir() throw( exError )
 {
-  QDir result = getHomeDir();
+    QDir result = getHomeDir();
+    result.mkpath( "index" );
 
-  result.mkpath( "index" );
+    if ( !result.cd( "index" ) )
+        throw exCantUseIndexDir();
 
-  if ( !result.cd( "index" ) )
-    throw exCantUseIndexDir();
-
-  return result.path() + QDir::separator();
+    return result.path() + QDir::separator();
 }
 
 QString getPidFileName() throw( exError )
 {
-  return getHomeDir().filePath( "pid" );
+    return getHomeDir().filePath( "pid" );
 }
 
 QString getHistoryFileName() throw( exError )
 {
-  return getHomeDir().filePath( "history" );
+    return getHomeDir().filePath( "history" );
 }
 
 QString getUserCssFileName() throw( exError )
 {
-  return getHomeDir().filePath( "article-style.css" );
+    return getHomeDir().filePath( "article-style.css" );
 }
 
 QString getUserCssPrintFileName() throw( exError )
 {
-  return getHomeDir().filePath( "article-style-print.css" );
+    return getHomeDir().filePath( "article-style-print.css" );
 }
 
 QString getUserQtCssFileName() throw( exError )
 {
-  return getHomeDir().filePath( "qt-style.css" );
+    return getHomeDir().filePath( "qt-style.css" );
 }
 
 QString getProgramDataDir() throw()
 {
-  if ( isPortableVersion() )
-    return QCoreApplication::applicationDirPath();
+    if ( isPortableVersion() )
+        return QCoreApplication::applicationDirPath();
 
-  #ifdef PROGRAM_DATA_DIR
-  return PROGRAM_DATA_DIR;
-  #else
-  return QCoreApplication::applicationDirPath();
-  #endif
+#ifdef PROGRAM_DATA_DIR
+    return PROGRAM_DATA_DIR;
+#else
+    return QCoreApplication::applicationDirPath();
+#endif
 }
 
 QString getLocDir() throw()
 {
-  if ( QDir( getProgramDataDir() ).cd( "locale" ) )
-    return getProgramDataDir() + "/locale";
-  else
-    return QCoreApplication::applicationDirPath() + "/locale";
+    if ( QDir( getProgramDataDir() ).cd( "locale" ) )
+        return getProgramDataDir() + "/locale";
+    else
+        return QCoreApplication::applicationDirPath() + "/locale";
 }
 
 bool isPortableVersion() throw()
 {
-  struct IsPortable
-  {
-    bool isPortable;
+    struct IsPortable
+    {
+        bool isPortable;
 
-    IsPortable(): isPortable( QFileInfo( QCoreApplication::applicationDirPath() + "/portable" ).isDir() )
-    {}
-  };
-
-  static IsPortable p;
-
-  return p.isPortable;
+        IsPortable(): isPortable( QFileInfo( QCoreApplication::applicationDirPath() + "/portable" ).isDir() )
+        {}
+    };
+    static IsPortable p;
+    return p.isPortable;
 }
 
 QString getPortableVersionDictionaryDir() throw()
 {
-  if ( isPortableVersion() )
-    return getProgramDataDir() + "/content";
-  else
-    return QString();
+    if ( isPortableVersion() )
+        return getProgramDataDir() + "/content";
+    else
+        return QString();
 }
 
 QString getPortableVersionMorphoDir() throw()
 {
-  if ( isPortableVersion() )
-    return getPortableVersionDictionaryDir() + "/morphology";
-  else
-    return QString();
+    if ( isPortableVersion() )
+        return getPortableVersionDictionaryDir() + "/morphology";
+    else
+        return QString();
 }
 
 }

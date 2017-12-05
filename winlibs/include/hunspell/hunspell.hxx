@@ -1,13 +1,9 @@
+﻿#include "hunvisapi.h"
+
 #include "hashmgr.hxx"
 #include "affixmgr.hxx"
 #include "suggestmgr.hxx"
 #include "langnum.hxx"
-
-#define  SPELL_COMPOUND  (1 << 0)
-#define  SPELL_FORBIDDEN (1 << 1)
-#define  SPELL_ALLCAP    (1 << 2)
-#define  SPELL_NOCAP     (1 << 3)
-#define  SPELL_INITCAP   (1 << 4)
 
 #define  SPELL_XML "<?xml?>"
 
@@ -15,27 +11,13 @@
 #define MAXSUGGESTION 15
 #define MAXSHARPS 5
 
+#define HUNSPELL_OK       (1 << 0)
+#define HUNSPELL_OK_WARN  (1 << 1)
+
 #ifndef _MYSPELLMGR_HXX_
 #define _MYSPELLMGR_HXX_
 
-#ifdef HUNSPELL_STATIC
-	#define DLLEXPORT
-#else
-	#ifdef HUNSPELL_EXPORTS
-		#define DLLEXPORT  __declspec( dllexport )
-	#else
-		#define DLLEXPORT  __declspec( dllimport )
-	#endif
-#endif
-
-#undef DLLEXPORT
-	#define DLLEXPORT
-
-#ifdef WIN32
-class DLLEXPORT Hunspell
-#else
-class Hunspell
-#endif
+class LIBHUNSPELL_DLL_EXPORTED Hunspell
 {
   AffixMgr*       pAMgr;
   HashMgr*        pHMgr[MAXDIC];
@@ -63,14 +45,14 @@ public:
 
   /* spell(word) - spellcheck word
    * output: 0 = bad word, not 0 = good word
-   *   
+   *
    * plus output:
    *   info: information bit array, fields:
-   *     SPELL_COMPOUND  = a compound word 
+   *     SPELL_COMPOUND  = a compound word
    *     SPELL_FORBIDDEN = an explicit forbidden word
    *   root: root (stem), when input is a word with affix(es)
    */
-   
+
   int spell(const char * word, int * info = NULL, char ** root = NULL);
 
   /* suggest(suggestions, word) - search suggestions
@@ -92,20 +74,20 @@ public:
  /* morphological functions */
 
  /* analyze(result, word) - morphological analysis of the word */
- 
+
   int analyze(char*** slst, const char * word);
 
  /* stem(result, word) - stemmer function */
-  
+
   int stem(char*** slst, const char * word);
-  
+
  /* stem(result, analysis, n) - get stems from a morph. analysis
   * example:
   * char ** result, result2;
   * int n1 = analyze(&result, "words");
-  * int n2 = stem(&result2, result, n1);   
+  * int n2 = stem(&result2, result, n1);
   */
- 
+
   int stem(char*** slst, char ** morph, int n);
 
  /* generate(result, word, word2) - morphological generation by example(s) */
@@ -125,14 +107,14 @@ public:
   /* functions for run-time modification of the dictionary */
 
   /* add word to the run-time dictionary */
-  
+
   int add(const char * word);
 
   /* add word to the run-time dictionary with affix flags of
    * the example (a dictionary word): Hunspell will recognize
    * affixed forms of the new word, too.
    */
-  
+
   int add_with_affix(const char * word, const char * example);
 
   /* remove word from the run-time dictionary */
@@ -147,18 +129,19 @@ public:
 
   struct cs_info * get_csconv();
   const char * get_version();
-  
+
+  int get_langnum() const;
+
   /* experimental and deprecated functions */
 
 #ifdef HUNSPELL_EXPERIMENTAL
-  /* suffix is an affix flag string, similarly in dictionary files */  
+  /* suffix is an affix flag string, similarly in dictionary files */
   int put_word_suffix(const char * word, const char * suffix);
   char * morph_with_correction(const char * word);
 
   /* spec. suggestions */
   int suggest_auto(char*** slst, const char * word);
   int suggest_pos_stems(char*** slst, const char * word);
-  char * get_possible_root();
 #endif
 
 private:

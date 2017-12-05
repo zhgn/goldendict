@@ -1,6 +1,9 @@
-#ifdef __WIN32 // Q_OS_WIN32 isn't available at this point
+﻿#include <QtGlobal>
+
+#ifdef Q_OS_WIN // Q_OS_WIN32 isn't available at this point
 #define _WIN32_WINNT 0x0430
 #include <windows.h>
+#include <WinUser.h>
 #endif
 
 #include "hotkeywrapper.hh"
@@ -118,15 +121,15 @@ bool HotkeyWrapper::checkState(quint32 vk, quint32 mod)
       if ( ( vk == VK_INSERT || vk == 'c' || vk == 'C' ) && mod == MOD_CONTROL )
       {
         INPUT i[ 2 ];
-  
+
         memset( i, 0, sizeof( i ) );
-  
+
         i[ 0 ].type = INPUT_KEYBOARD;
         i[ 0 ].ki.wVk = 'C';
         i[ 1 ].type = INPUT_KEYBOARD;
         i[ 1 ].ki.wVk = 'C';
         i[ 1 ].ki.dwFlags = KEYEVENTF_KEYUP;
-  
+
         UnregisterHotKey( hwnd, hs.id );
         SendInput( 2, i, sizeof( *i ) );
         RegisterHotKey(hwnd, hs.id, hs.modifier, hs.key);

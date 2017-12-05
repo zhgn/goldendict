@@ -60,7 +60,7 @@ struct IdxHeader
   uint32_t langTo;    // Target language
 }
 #ifndef _MSC_VER
-__attribute__((packed))
+
 #endif
 ;
 

@@ -1,4 +1,4 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "stardict.hh"
@@ -15,8 +15,8 @@
 #include <map>
 #include <set>
 #include <string>
-#ifndef __WIN32
-#include <arpa/inet.h>
+#ifndef Q_OS_WIN
+//#include <arpa/inet.h>
 #else
 #include <winsock.h>
 #endif
@@ -94,7 +94,7 @@ struct IdxHeader
   uint32_t langTo;    // Target language
 }
 #ifndef _MSC_VER
-__attribute__((packed))
+
 #endif
 ;
 

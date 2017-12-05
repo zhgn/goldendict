@@ -1,4 +1,4 @@
-/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
+﻿/* This file is (c) 2008-2011 Konstantin Isakov <ikm@users.berlios.de>
  * Part of GoldenDict. Licensed under GPLv3 or later, see the LICENSE file */
 
 #include "dsl_details.hh"
@@ -13,7 +13,7 @@ namespace Details {
 using gd::wstring;
 using std::list;
 
-#ifdef __WIN32
+#ifdef Q_OS_WIN
 
 // wcscasecmp() function is a GNU extension, we need to reimplement it
 // for non-GNU systems.
@@ -131,7 +131,7 @@ ArticleDom::ArticleDom( wstring const & str ):
           else
             ++transcriptionCount;
         }
-        
+
         if ( !isClosing )
         {
           if ( name.size() == 2 && name[ 0 ] == L'm' && iswdigit( name[ 1 ] ) )
@@ -139,7 +139,7 @@ ArticleDom::ArticleDom( wstring const & str ):
             // Opening an 'mX' tag closes any previous 'm' tag
             closeTag( GD_NATIVE_TO_WS( L"m" ), stack, false );
           }
-          
+
           Node node( Node::Tag(), name, attrs );
 
           if ( stack.empty() )
@@ -367,7 +367,7 @@ ArticleDom::ArticleDom( wstring const & str ):
 
       if ( escaped && ch == L' ' )
         ch = 0xA0; // Escaped spaces turn into non-breakable ones in Lingvo
-            
+
       textNode->text.push_back( ch );
     } // for( ; ; )
   }
@@ -534,7 +534,7 @@ DslScanner::DslScanner( string const & fileName ) throw( Ex, Iconv::Ex ):
       gzclose( f );
       throw exMalformedDslFile( fileName );
     }
-    
+
     encoding = Utf8;
   }
   else
