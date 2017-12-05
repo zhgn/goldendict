@@ -1,4 +1,4 @@
-/*
+﻿/*
  * copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
  *
  * This file is part of FFmpeg.
@@ -31,7 +31,7 @@
 #endif
 
 #include <errno.h>
-#include <inttypes.h>
+//#include <inttypes.h>
 #include <limits.h>
 #include <math.h>
 #include <stdint.h>

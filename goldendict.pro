@@ -63,8 +63,9 @@ win32 {
         DEFINES += GD_NO_MANIFEST
         # QMAKE_CXXFLAGS_RELEASE += /GL # slows down the linking significantly
         LIBS += -lshell32 -luser32 -lsapi -lole32
-        Debug: LIBS+= -lhunspelld
-        Release: LIBS+= -lhunspell
+#        Debug: LIBS+= -lhunspelld
+#        Release: LIBS+= -lhunspell
+        LIBS+= -lhunspell
         HUNSPELL_LIB = hunspell
     } else {
         CONFIG(gcc48) {
@@ -115,7 +116,10 @@ win32 {
 
     gcc48:QMAKE_CXXFLAGS += -Wno-unused-local-typedefs
 
-    CONFIG += zim_support
+#    CONFIG += zim_support
+    CONFIG += no_extra_tiff_handler
+    CONFIG += no_epwing_support
+    CONFIG += no_chinese_conversion_support
 
     !CONFIG( no_chinese_conversion_support ) {
         CONFIG += chinese_conversion_support
