@@ -68,14 +68,13 @@ int main( int argc, char **argv )
     // the default 512 up to 2048.
     _setmaxstdio( 2048 );
 #endif
-    QHotkeyApplication app( "GoldenDict", argc, argv );
+    QHotkeyApplication app( "WBDictionary", argc, argv );
 
     if ( app.sendMessage( "bringToFront" ) )
         return 0; // Another instance is running
 
-    app.setApplicationName( "GoldenDict" );
-    app.setOrganizationDomain( "http://goldendict.org/" );
-    app.setWindowIcon( QIcon( ":/icons/programicon.png" ) );
+    app.setApplicationName( "WBDictionary" );
+    app.setWindowIcon( QIcon( ":/icons/dictionary.png" ) );
     Config::Class cfg( Config::load() );
 
     if ( Config::isPortableVersion() )

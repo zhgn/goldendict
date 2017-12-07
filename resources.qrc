@@ -43,5 +43,7 @@
         <file>icons/forvo.png</file>
         <file>icons/windows-list.png</file>
         <file>CREDITS.txt</file>
+        <file>icons/dictionary.png</file>
+        <file>icons/dictionary.svg</file>
     </qresource>
 </RCC>
