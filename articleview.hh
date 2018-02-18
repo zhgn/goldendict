@@ -4,7 +4,7 @@
 #ifndef __ARTICLEVIEW_HH_INCLUDED__
 #define __ARTICLEVIEW_HH_INCLUDED__
 
-#include <QWebView>
+#include <QWebEngineView>
 #include <QMap>
 #include <QUrl>
 #include <QSet>
@@ -256,7 +256,7 @@ private slots:
   void attachToJavaScript();
   void linkClicked( QUrl const & );
   void linkHovered( const QString & link, const QString & title, const QString & textContent );
-  void contextMenuRequested( QPoint const & );
+//  void contextMenuRequested( QPoint const & );
 
   void resourceDownloadFinished();
 
@@ -319,10 +319,6 @@ private:
   /// to point to url text translation instead, and saves the original
   /// url to the appropriate "contexts" entry.
   void tryMangleWebsiteClickedUrl( QUrl & url, Contexts & contexts );
-
-  /// Use the known information about the current frame to update the current
-  /// article's value.
-  void updateCurrentArticleFromCurrentFrame( QWebFrame * frame = 0 );
 
   /// Saves current article and scroll position for the current history item.
   /// Should be used when leaving the page.

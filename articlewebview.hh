@@ -4,7 +4,7 @@
 #ifndef __ARTICLEWEBVIEW_HH_INCLUDED__
 #define __ARTICLEWEBVIEW_HH_INCLUDED__
 
-#include <QWebView>
+#include <QWebEngineView>
 #include "config.hh"
 
 class ArticleInspector;
@@ -17,7 +17,7 @@ class ArticleInspector;
 ///    get double-click events after the fact with the doubleClicked() signal.
 /// 2. Manage our own QWebInspector instance. In order to show inspector correctly,
 ///    use triggerPageAction( QWebPage::InspectElement ) instead.
-class ArticleWebView: public QWebView
+class ArticleWebView: public QWebEngineView
 {
   Q_OBJECT
 
@@ -33,7 +33,7 @@ public:
   void setSelectionBySingleClick( bool set )
   { selectionBySingleClick = set; }
 
-  void triggerPageAction( QWebPage::WebAction action, bool checked = false );
+  void triggerPageAction( QWebEnginePage::WebAction action, bool checked = false );
 
 signals:
 
@@ -45,7 +45,6 @@ signals:
 
 protected:
 
-  bool event( QEvent * event );
   void mousePressEvent( QMouseEvent * event );
   void mouseReleaseEvent( QMouseEvent * event );
   void mouseDoubleClickEvent( QMouseEvent * event );
@@ -55,11 +54,9 @@ protected:
 private:
 
   Config::Class * cfg;
-  ArticleInspector * inspector;
 
   bool midButtonPressed;
   bool selectionBySingleClick;
-  bool showInspectorDirectly;
 };
 
 #endif
